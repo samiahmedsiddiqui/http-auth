@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/yasglobal
 Tags: Auth, http auth, authentication, http authentication, restrict pages, restrict site, login, admin, crawler, crawl, locked
 Requires at least: 3.5
 Tested up to: 4.7
-Stable tag: 0.1
+Stable tag: 0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,3 +28,12 @@ If you need to install this using FTP or SFTP, you should follow these steps:
 1. Upload `http-auth.php` to the `/wp-content/plugins/` directory using your favorite FTP client.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. That’s it.
+
+== Changelog ==
+
+= 0.2 =
+ * Add OOPS Concept to make the performance better 
+
+= 0.1 =
+
+ * First release on wordpress.org
