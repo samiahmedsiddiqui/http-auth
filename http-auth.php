@@ -1,18 +1,18 @@
 <?php
 
 /**
- * @package http_auth
+ * @package HttpAuth\Main
  */
 
 /**
  * Plugin Name: Http Auth
  * Plugin URI: https://wordpress.org/plugins/http-auth/
  * Description: This plugin allows you apply HTTP Auth on your site. You can apply Http Authentication all over the site or only the admin pages.
- * Version:     0.2
+ * Version:     0.2.1
  * Donate link: https://www.paypal.me/yasglobal
- * Author: Sami Ahmed Siddiqui
- * Author URI: http://www.yasglobal.com/web-design-development/wordpress/http-auth/
- * License: GPLv2 or later
+ * Author: YAS Global Team
+ * Author URI: https://www.yasglobal.com/web-design-development/wordpress/http-auth/
+ * License: GPL V3
  * Text Domain: http-auth
  */
 
@@ -40,13 +40,21 @@ if ( ! defined( 'ABSPATH' ) ) {
   exit;
 }
 
-define( 'http_auth__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+if( !function_exists("add_action") || !function_exists("add_filter") ) {
+  header( 'Status: 403 Forbidden' );
+  header( 'HTTP/1.1 403 Forbidden' );
+  exit();
+}
+
+if( !defined('HTTP_AUTH__PLUGIN_DIR') ) {
+  define( 'HTTP_AUTH__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
 
 if( !is_admin() ) {
-  require_once(http_auth__PLUGIN_DIR.'class.http-auth.php');   
+  require_once(HTTP_AUTH__PLUGIN_DIR.'frontend/class.http-auth.php');   
   add_action( 'init', array( 'Http_Auth', 'init' ) );
 } else {
-  require_once(http_auth__PLUGIN_DIR.'class.http-auth-admin.php');
+  require_once(HTTP_AUTH__PLUGIN_DIR.'admin/class.http-auth-admin.php');
   add_action( 'init', array( 'Http_Auth_Admin', 'init' ) );
 
   $plugin = plugin_basename(__FILE__); 

@@ -51,7 +51,7 @@ class Http_Auth_Admin {
       $http_apply_admin = "";
       $http_apply_site = "checked";
     }
-    wp_enqueue_style( 'style', plugins_url('/style.css', __FILE__) );
+    wp_enqueue_style( 'style', plugins_url('/css/admin-style.min.css', __FILE__) );
     ?>
     <table class="http-auth-table">
       <caption>Http Credentials</caption>

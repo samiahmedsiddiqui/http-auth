@@ -1,0 +1,12 @@
+body.http-restricted {
+    background-color: white;
+    color: #333333;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 36px;
+    line-height: 18px;
+    font-size: 14px;
+}
+body.http-restricted p {
+	text-align: center;
+}

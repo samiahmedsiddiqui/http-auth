@@ -47,7 +47,7 @@ class Http_Auth {
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 <title>'.$sitename.' | Restricted Site</title>
-                <link rel="stylesheet" href="'.plugins_url('/style.css', __FILE__).'" type="text/css">
+                <link rel="stylesheet" href="'.plugins_url('/css/style.min.css', __FILE__).'" type="text/css">
               </head>
               <body class="http-restricted">
                 <p>'.$message.'</p>
