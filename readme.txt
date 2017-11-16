@@ -1,5 +1,4 @@
 === Http Auth ===
-
 Contributors: aliya-yasir, sasiddiqui
 Donate link: https://www.paypal.me/yasglobal
 Tags: Auth, http auth, authentication, http authentication, restrict pages, restrict site, login, admin, crawler, crawl, locked
@@ -7,7 +6,7 @@ Requires at least: 3.5
 Tested up to: 4.9
 Stable tag: 0.2.1
 License: GPLv3
-License URI: http://www.gnu.org/licenses/gpl.html
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 This plugin allows you apply HTTP Auth on your site. You can apply Http Authentication all over the site or only the admin pages.
 
