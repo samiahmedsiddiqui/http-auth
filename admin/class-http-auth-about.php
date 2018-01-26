@@ -60,7 +60,7 @@ class HTTP_Auth_About {
 
 			<div class="product">
 				<h2><?php _e( 'More from YAS Global', 'http-auth' ); ?></h2>
-				<span><?php _e('Our List of Plugins provides the services which helps you to manage your site URLs(Permalinks), Prevent your site from XSS Attacks, Brute force attacks, increase your site visitors by adding Strucutred JSON Markup and so on.', 'http-auth' ); ?></span>
+				<span><?php _e('Our List of Plugins provides the services which helps you to manage your site URLs(Permalinks), Prevent your site from XSS Attacks, Brute force attacks, increase your site visitors by adding Structured JSON Markup and so on.', 'http-auth' ); ?></span>
 				<div class="box">
 					<div class="img">
 						<img src= "<?php echo $img_src; ?>/custom-permalinks.svg" />
@@ -68,7 +68,7 @@ class HTTP_Auth_About {
 
 					<h3><?php _e( 'Custom Permalinks', 'http-auth' ); ?></h3>
 					<p><?php _e( 'Custom Permalinks helps you to make your permalinks customized for <em>individual</em> posts, pages, tags or categories. It will <strong>NOT</strong> apply whole permalink structures, or automatically apply a category\'s custom permalink to the posts within that category.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/custom-permalinks/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
+					<a href="https://www.custompermalinks.com/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
 				</div>
 
 				<div class="box">
@@ -76,7 +76,7 @@ class HTTP_Auth_About {
 						<img src= "<?php echo $img_src; ?>/permalinks-customizer.svg" />
 					</div>
 
-					<h3><?php _e( 'Permalink Customizer', 'http-auth' ); ?></h3>
+					<h3><?php _e( 'Permalinks Customizer', 'http-auth' ); ?></h3>
 					<p><?php _e( 'Allows you to either define different Permalink Structure or define same Permalink Structure for default and Custom PostTypes, Taxonomies. Plugin automatically creates the user-friendly URLs as per your defined structured that can be edited from the single post/page.', 'http-auth' ); ?></p>
 					<a href="https://wordpress.org/plugins/permalinks-customizer/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
 				</div>
@@ -96,8 +96,8 @@ class HTTP_Auth_About {
 						<img src= "<?php echo $img_src; ?>/schema-for-article.svg" />
 					</div>
 
-					<h3><?php _e( 'SCHEMA for Article', 'schema-for-article' ); ?></h3>
-					<p><?php _e( 'Simply the easiest solution to add valid schema.org as a JSON script in the head of blog posts or articles. You can choose the schema either to show with the type of Article or NewsArticle from the settings page.', 'schema-for-article' ); ?></p>
+					<h3><?php _e( 'SCHEMA for Article', 'http-auth' ); ?></h3>
+					<p><?php _e( 'Simply the easiest solution to add valid schema.org as a JSON script in the head of blog posts or articles. You can choose the schema either to show with the type of Article or NewsArticle from the settings page.', 'http-auth' ); ?></p>
 					<a href="https://wordpress.org/plugins/schema-for-article/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
 				</div>
 
@@ -107,7 +107,7 @@ class HTTP_Auth_About {
 					</div>
 
 					<h3><?php _e( 'Make Paths Relative', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Convert the paths(URLs) to relative instead of absolute. You can make <strong>Post</strong>, <strong>Category</strong>, <strong>Archive</strong>, <strong>Image</strong> URLs and <strong>Script</strong> and <strong>Style</strong> src as per your requirement. You can choose which you want to be relative from the setttings Page.', 'http-auth' ); ?></p>
+					<p><?php _e( 'Convert the paths(URLs) to relative instead of absolute. You can make <strong>Post</strong>, <strong>Category</strong>, <strong>Archive</strong>, <strong>Image</strong> URLs and <strong>Script</strong> and <strong>Style</strong> src as per your requirement. You can choose which you want to be relative from the settings Page.', 'http-auth' ); ?></p>
 					<a href="https://wordpress.org/plugins/make-paths-relative/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
 				</div>
 

@@ -3,7 +3,7 @@
  * Plugin Name: HTTP Auth
  * Plugin URI: https://wordpress.org/plugins/http-auth/
  * Description: Keeps you to secure your whole site on the development time and admin pages from the Brute attack.
- * Version: 0.3
+ * Version: 0.3.1
  * Author: YAS Global Team
  * Author URI: https://www.yasglobal.com/web-design-development/wordpress/http-auth/
  * Donate link: https://www.paypal.me/yasglobal
@@ -16,6 +16,7 @@
  */
 
 /**
+ * HTTP Auth - Secure site from Brute Attacks
  * Copyright 2016-2018 and Sami Ahmed Siddiqui <sami.siddiqui@yasglobal.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,12 +38,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
 	exit;
-}
-
-if( ! function_exists( 'add_action' ) || ! function_exists( 'add_filter' ) ) {
-	header( 'Status: 403 Forbidden' );
-	header( 'HTTP/1.1 403 Forbidden' );
-	exit();
 }
 
 if ( ! defined( 'HTTP_AUTH_FILE' ) ) {

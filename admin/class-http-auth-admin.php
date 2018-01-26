@@ -75,14 +75,26 @@ class HTTP_Auth_Admin {
 	}
 
 	/**
-	 * Plugin Settings Page Link on the Plugin Page under the Plugin Name.
+	 * Plugin About, Contact and Settings Link on the Plugin Page
+	 * under the Plugin Name.
 	 */
 	public function settings_link( $links ) {
-		$settings_link = sprintf(
+		$about = sprintf(
+			__( '<a href="%s" title="About">About</a>', 'http-auth' ),
+			'admin.php?page=http-auth-about-plugins'
+		);
+		$contact = sprintf(
+			__( '<a href="%s" title="Contact" target="_blank">Contact</a>', 'http-auth' ),
+			'https://www.yasglobal.com/#request-form'
+		);
+		$settings = sprintf(
 			__( '<a href="%s" title="Settings">Settings</a>', 'http-auth' ),
 			'admin.php?page=http-auth-settings'
 		);
-		array_unshift( $links, $settings_link );
+		array_unshift( $links, $settings );
+		array_unshift( $links, $contact );
+		array_unshift( $links, $about );
+
 		return $links;
 	}
 }
