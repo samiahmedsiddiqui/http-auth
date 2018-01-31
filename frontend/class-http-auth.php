@@ -3,7 +3,7 @@
  * @package HTTPAuth
  */
 
-class Http_Auth {
+class HTTP_Auth {
 
 	/**
 	 * Class constructor.

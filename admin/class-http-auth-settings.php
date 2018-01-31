@@ -13,7 +13,7 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Schema Settings
+	 * HTTP Auth Settings
 	 */
 	private function http_auth_configs() {
 		if ( isset( $_POST['submit'] ) ) {

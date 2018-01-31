@@ -18,8 +18,8 @@ class HTTP_Auth_Admin {
 	/**
 	 * Add Settings Pages in the Dashboard Menu.
 	 */
-	public static function admin_menu() {
-		add_menu_page('HTTP AUTH', 'HTTP AUTH',
+	public function admin_menu() {
+		add_menu_page('HTTP Auth', 'HTTP Auth',
 			'administrator', 'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
@@ -37,7 +37,7 @@ class HTTP_Auth_Admin {
 	 * Admin Settings Page by which you can change the HTTP Auth credentials,
 	 * add custom message and choose where to apply the plugin.
 	 */
-	public static function admin_settings_page() {
+	public function admin_settings_page() {
 		if( ! current_user_can('administrator') )  {
 			wp_die( 
 				__( 'You do not have sufficient permissions to access this page.' )

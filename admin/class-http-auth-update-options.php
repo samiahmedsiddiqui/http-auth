@@ -38,6 +38,6 @@ class HTTP_Auth_Update_Options {
 			delete_option( 'http_auth_apply' );
 			delete_option( 'http_auth_activate' );
 		}
-		update_option( 'http_auth_plugin_version', '0.3.1' );
+		update_option( 'http_auth_plugin_version', '0.3.2' );
 	}
 }

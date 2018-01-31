@@ -1,10 +1,10 @@
 === HTTP Auth ===
 Contributors: aliya-yasir, sasiddiqui
 Donate link: https://www.paypal.me/yasglobal
-Tags: Auth, http-auth, authentication, http authentication, brute attack, brute-force, restrict pages, restrict site, login, admin, crawler, crawl, locked
+Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
 Requires at least: 3.5
 Tested up to: 4.9
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -15,6 +15,7 @@ Enabling this plugin allows you to set up HTTP Authentication on your site. You 
 
 This plugin helps:
 
+* Secure your admin pages from the Brute attack.
 * Restricting crawler to crawl on your site while development.
 * Restrict admin pages after being your site Live.
 * Easy to activate or deactivate HTTP Auth without deactivating plugin.
@@ -52,6 +53,10 @@ This process defines you the steps to follow either you are installing through W
 2. You're done!
 
 == Changelog ==
+
+= 0.3.2 =
+
+ * $this variable Notice in Static Method
 
 = 0.3.1 =
 
