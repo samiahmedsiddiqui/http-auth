@@ -3,7 +3,7 @@ Contributors: aliya-yasir, sasiddiqui
 Donate link: https://www.paypal.me/yasglobal
 Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
 Requires at least: 3.5
-Tested up to: 4.9
+Tested up to: 5.0.2
 Stable tag: 0.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
