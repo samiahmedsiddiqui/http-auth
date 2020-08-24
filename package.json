@@ -1,0 +1,21 @@
+{
+  "name": "http-auth",
+  "description": "Development files for the HTTP Auth plugin.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yasglobal/http-auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yasglobal/http-auth/issues"
+  },
+  "author": "Sami Ahmed Siddiqui",
+  "devDependencies": {
+    "del": "^5.1.0",
+    "gulp": "4.0.2",
+    "gulp-clean-css": "4.2.0",
+    "gulp-rename": "1.4.0"
+  },
+  "preventXssVulnerability": {
+    "pluginVersion": "0.3.2"
+  }
+}

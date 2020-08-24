@@ -1,0 +1,23 @@
+# git files
+.gitattributes export-ignore
+.gitignore export-ignore
+
+# Assets(Images)
+/assets export-ignore
+
+# Composer file
+composer.json export-ignore
+
+# general text file
+README.md export-ignore
+
+# Gulp file to minify CSS and JS
+gulpfile.js export-ignore
+
+# manifest file
+package.json export-ignore
+
+# Unminified CSS files
+about-plugins.css export-ignore
+admin-style.css export-ignore
+style.css export-ignore

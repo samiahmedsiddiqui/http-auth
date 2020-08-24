@@ -11,6 +11,12 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
+# Gulp
+/node_modules/
+
+# Package Lock
+package-lock.json
+
 # OS X metadata
 .DS_Store
 
