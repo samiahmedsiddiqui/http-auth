@@ -1,0 +1,31 @@
+{
+  "name": "yasglobal/http-auth",
+  "description": "Helps you to secure your whole site on the development time and admin pages from the Brute attack.",
+  "type": "wordpress-plugin",
+  "keywords": [
+    "wordpress",
+    "auth",
+    "http-auth",
+    "brute-force-attacks"
+  ],
+  "homepage": "https://wordpress.org/plugins/http-auth/",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Sami Ahmed Siddiqui",
+      "email": "sami.siddiqui@yasglobal.com",
+      "homepage": "https://www.yasglobal.com/",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "sami.siddiqui@yasglobal.com",
+    "issues": "https://github.com/yasglobal/http-auth/issues",
+    "forum": "https://wordpress.org/support/plugin/http-auth/",
+    "source": "https://github.com/yasglobal/http-auth"
+  },
+  "require": {
+    "php": ">5.6",
+    "composer/installers": "1.7.0"
+  }
+}
