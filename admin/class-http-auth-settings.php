@@ -64,8 +64,6 @@ class HTTP_Auth_Settings
                 $http_settings['username'] = esc_attr( $set_username );
             }
 
-            print_r($http_settings);exit;
-
             update_option( 'http_auth_settings', serialize( $http_settings ) );
 
             if ( 'apache' == strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
