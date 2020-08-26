@@ -15,28 +15,60 @@ class HTTP_Auth_Settings
     }
 
     /**
-     * HTTP Auth Settings
+     * Save HTTP Auth Settings.
      *
      * @access private
-     * @since 0.1
+     * @since 1.0.0
      */
-    private function http_auth_configs()
+    private function save_settings()
     {
-        if ( isset( $_POST['submit'] ) ) {
-            $activate_auth = '';
-            if ( isset( $_POST['http_auth_activate'] ) ) {
-                $activate_auth = $_POST['http_auth_activate'];
-            }
-            $http_settings =  array(
-                'username' => esc_attr( $_POST['http_auth_username'] ),
-                'password' => esc_attr( $_POST['http_auth_password'] ),
-                'message'  => $_POST['http_auth_message'],
-                'apply'    => $_POST['http_auth_apply'],
-                'activate' => $activate_auth,
+        $form_submit = filter_input( INPUT_POST, 'submit' );
+        $user_id     = get_current_user_id();
+
+        if ( $form_submit
+            && check_admin_referer( 'http-auth-settings_' . $user_id,
+                '_http_auth_settings_nonce'
+            )
+        ) {
+            $http_settings = array(
+                'username'        => '',
+                'password'        => '',
+                'message'         => '',
+                'http_auth_apply' => 'site',
+                'activate'        => 'off',
             );
+
+            $activate_auth = filter_input( INPUT_POST, 'http_auth_activate' );
+            $set_apply     = filter_input( INPUT_POST, 'http_auth_apply' );
+            $set_message   = filter_input( INPUT_POST, 'http_auth_message' );
+            $set_password  = filter_input( INPUT_POST, 'http_auth_password' );
+            $set_username  = filter_input( INPUT_POST, 'http_auth_username' );
+
+            if ( $activate_auth ) {
+                $http_settings['activate'] = $activate_auth;
+            }
+
+            if ( $set_apply && 'admin' === $set_apply ) {
+                $http_settings['http_auth_apply'] = $set_apply;
+            }
+
+            if ( $set_message ) {
+                $http_settings['message'] = esc_html( $set_message );
+            }
+
+            if ( $set_password ) {
+                $http_settings['password'] = esc_attr( $set_password );
+            }
+
+            if ( $set_username ) {
+                $http_settings['username'] = esc_attr( $set_username );
+            }
+
+            print_r($http_settings);exit;
+
             update_option( 'http_auth_settings', serialize( $http_settings ) );
 
-            if ( strtolower( $_SERVER['SERVER_SOFTWARE'] ) == 'apache' ) {
+            if ( 'apache' == strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
                 $filename    = ABSPATH . '.htaccess';
                 $get_content = file_get_contents( $filename, true );
                 if ( $get_content !== false ) {
@@ -57,10 +89,22 @@ class HTTP_Auth_Settings
                 }
             }
         }
+    }
+
+    /**
+     * HTTP Auth Settings
+     *
+     * @access private
+     * @since 0.1
+     */
+    private function http_auth_configs()
+    {
+        $this->save_settings();
 
         $http_apply_admin = 'checked';
         $http_apply_site  = '';
-        $get_settings     = unserialize( get_option('http_auth_settings') );
+        $get_settings     = unserialize( get_option( 'http_auth_settings' ) );
+        $user_id          = get_current_user_id();
         $username = $password = $message = $http_activated_checked = '';
 
         if ( isset( $get_settings ) && ! empty( $get_settings ) ) {
@@ -87,6 +131,11 @@ class HTTP_Auth_Settings
           ?>
           </h1>
           <form enctype="multipart/form-data" method="POST" action="" id="http-auth">
+            <?php
+              wp_nonce_field( 'http-auth-settings_' . $user_id,
+                  '_http_auth_settings_nonce', true
+              );
+            ?>
             <table class="http-auth-table">
               <caption>
                 <?php
@@ -178,7 +227,7 @@ class HTTP_Auth_Settings
                     <input type="checkbox" name="http_auth_activate" value="on" <?php echo $http_activated_checked; ?> />
                     <strong>
                       <?php
-                        esc_html_e( 'Activate HTTP Authentication', 'http-auth' );
+                        esc_html_e( 'Activate', 'http-auth' );
                       ?>
                     </strong>
                   </td>
