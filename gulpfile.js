@@ -12,17 +12,22 @@ async function deleteMinFiles() {
 }
 
 function minifyCss() {
-  return src([
-      'admin/**/*.css',
-      'frontend/**/*.css',
-      '!admin/**/*/*.min.css',
-      '!frontend/**/*.min.css'
-    ])
+  return src(
+      [
+        'admin/**/*.css',
+        'frontend/**/*.css',
+        '!admin/**/*/*.min.css',
+        '!frontend/**/*.min.css'
+      ],
+      {
+        base: './'
+      }
+    )
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(rename(function(path) {
-        path.extname = "-" + pluginVersion + ".min" + path.extname;
+        path.extname = '-' + pluginVersion + '.min' + path.extname;
     }))
-    .pipe(dest('admin/'));
+    .pipe(dest('./'));
 }
 
 exports.build = parallel(deleteMinFiles, minifyCss);

@@ -2,11 +2,10 @@
 /**
  * Plugin Name: HTTP Auth
  * Plugin URI: https://wordpress.org/plugins/http-auth/
- * Description: Keeps you to secure your whole site on the development time and admin pages from the Brute attack.
+ * Description: Secure your website from the Brute-force attack.
  * Version: 0.3.2
  * Author: YAS Global Team
  * Author URI: https://www.yasglobal.com/web-design-development/wordpress/http-auth/
- * Donate link: https://www.paypal.me/yasglobal
  * License: GPLv3
  *
  * Text Domain: http-auth
@@ -16,8 +15,8 @@
  */
 
 /**
- * HTTP Auth - Secure site from Brute Attacks
- * Copyright 2016-2018 and Sami Ahmed Siddiqui <sami.siddiqui@yasglobal.com>
+ * HTTP Auth - Secure your website from the Brute-force attack
+ * Copyright 2016-2020 and Sami Ahmed Siddiqui <sami.siddiqui@yasglobal.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,12 +35,89 @@
 
 // Make sure we don't expose any info if called directly
 if ( ! defined( 'ABSPATH' ) ) {
-	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
-	exit;
+    esc_html_e(
+        'Hi there! I\'m just a plugin, not much I can do when called directly.',
+        'http-auth'
+    );
+    exit;
 }
 
-if ( ! defined( 'HTTP_AUTH_FILE' ) ) {
-	define( 'HTTP_AUTH_FILE', __FILE__ );
+final class HTTP_Auth
+{
+
+    /**
+     * Class constructor.
+     */
+    public function __construct()
+    {
+        $this->setup_constants();
+        $this->includes();
+    }
+
+    /**
+     * Setup plugin constants.
+     *
+     * @access private
+     * @since 1.0.0
+     */
+    private function setup_constants()
+    {
+        if ( ! defined( 'HTTP_AUTH_PLUGIN_VERSION' ) ) {
+            define( 'HTTP_AUTH_PLUGIN_VERSION', '0.3.2' );
+        }
+
+        if ( ! defined( 'HTTP_AUTH_FILE' ) ) {
+            define( 'HTTP_AUTH_FILE', __FILE__ );
+        }
+
+        if ( ! defined( 'HTTP_AUTH_PATH' ) ) {
+            define( 'HTTP_AUTH_PATH', plugin_dir_path( HTTP_AUTH_FILE ) );
+        }
+
+        if ( ! defined( 'HTTP_AUTH_BASENAME' ) ) {
+            define( 'HTTP_AUTH_BASENAME', plugin_basename( HTTP_AUTH_FILE ) );
+        }
+    }
+
+    /**
+     * Include required files.
+     *
+     * @access private
+     * @since 1.0.0
+     */
+    private function includes()
+    {
+        include_once HTTP_AUTH_PATH . 'frontend/class-http-auth-frontend.php';
+        new HTTP_Auth_Frontend();
+
+        if ( is_admin() ) {
+            include_once HTTP_AUTH_PATH . 'admin/class-http-auth-admin.php';
+            new HTTP_Auth_Admin();
+
+            add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+        }
+    }
+
+    /**
+     * Add textdomain hook for translation.
+     *
+     * @access public
+     * @since 0.3
+     */
+    public function load_textdomain() {
+        /* No longer needed, will be removed in next version.
+        if ( '0.3' > get_option( 'http_auth_plugin_version' ) ) {
+            include_once HTTP_AUTH_PATH . 'admin/class-http-auth-update-options.php';
+            new HTTP_Auth_Update_Options();
+        }
+        */
+
+        $dirname = rtrim( HTTP_AUTH_PATH , '/' );
+
+        load_plugin_textdomain( 'http-auth', FALSE,
+            wp_basename( $dirname ) . '/languages/'
+        );
+    }
 }
 
-require_once( dirname( HTTP_AUTH_FILE ) . '/http-auth-main.php' );
+new HTTP_Auth();

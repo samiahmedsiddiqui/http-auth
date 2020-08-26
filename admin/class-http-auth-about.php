@@ -1,147 +1,249 @@
 <?php
 /**
- * @package HTTPAuth\Admin
+ * @package HTTPAuth
  */
 
-class HTTP_Auth_About {
+class HTTP_Auth_About
+{
 
-	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->more_plugins();
-	}
+    /**
+     * Call Post Settings Function.
+     */
+    function __construct()
+    {
+        $this->more_plugins();
+    }
 
-	/**
-	 * More Plugins HTML
-	 */
-	private function more_plugins() {
-		$plugin_url = plugins_url( '/admin', HTTP_AUTH_FILE );
-		$img_src    = $plugin_url . '/images';
-		wp_enqueue_style( 'style', $plugin_url . '/css/about-plugins.min.css' );
-		$plugin_name = __( 'HTTP Auth', 'http-auth' );
-		$button_text = __( 'Check it out', 'http-auth' );
-		$five_star = '<span class="star">
-										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 53.867 53.867" width="15" height="15">
-										<polygon points="26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 
-												10.288,52.549 13.467,34.013 0,20.887 18.611,18.182 "/>
-										</svg>
-										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 53.867 53.867" width="15" height="15">
-										<polygon points="26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 
-												10.288,52.549 13.467,34.013 0,20.887 18.611,18.182 "/>
-										</svg>
-										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 53.867 53.867" width="15" height="15">
-										<polygon points="26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 
-												10.288,52.549 13.467,34.013 0,20.887 18.611,18.182 "/>
-										</svg>
-										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 53.867 53.867" width="15" height="15">
-										<polygon points="26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 
-												10.288,52.549 13.467,34.013 0,20.887 18.611,18.182 "/>
-										</svg>
-										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 53.867 53.867" width="15" height="15">
-										<polygon points="26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 
-												10.288,52.549 13.467,34.013 0,20.887 18.611,18.182 "/>
-										</svg>
-									</span>';
-		?>
+    /**
+     * More Plugins HTML.
+     *
+     * @access private
+     * @since 0.1
+     *
+     * @return void
+     */
+    private function more_plugins()
+    {
+        $plugin_url = plugins_url( '/admin', HTTP_AUTH_FILE );
+        $img_src    = $plugin_url . '/images';
+        ?>
 
-		<div class="wrap">
-			<div class="float">
-				<h1><?php echo $plugin_name . ' ' . HTTP_AUTH_PLUGIN_VERSION; ?></h1>
-				<div class="tagline">
-					<p><?php _e('Thank you for choosing HTTP Auth! We hope that your experience with our plugin for adding HTTP Authentication on your site is quick and easy.', 'http-auth' ); ?></p>
-					<p><?php printf( __( 'To support future development and help to make it even better just leaving us a <a href="%s" title="HTTP Auth Rating" target="_blank">%s</a> rating with a nice message to me :)', 'http-auth' ), 'https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post', $five_star ); ?></p>
-				</div>
-			</div>
+        <div class="wrap">
+          <div class="float">
+            <h1>
+              <?php
+              esc_html_e(
+                  'HTTP Auth v' . HTTP_AUTH_PLUGIN_VERSION,
+                  'http-auth'
+              );
+              ?>
+            </h1>
+            <div class="tagline">
+              <p>
+              <?php
+              esc_html_e(
+                  'Thank you for choosing HTTP Auth! We hope that your experience with our plugin for adding HTTP Authentication on your site is quick and easy.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <p>
+              <?php
+              esc_html_e(
+                  'To support future development and to help make it even better please leave a',
+                  'http-auth'
+              );
+              ?>
+              <a href="https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post" title="HTTP Auth Rating" target="_blank">
+                <?php
+                esc_html_e( '5-star', 'http-auth' );
+                ?>
+              </a>
+              <?php
+              esc_html_e( 'rating with a nice message to me :)', 'http-auth' );
+              ?>
+              </p>
+            </div>
+          </div>
 
-			<div class="float">
-        <object type="image/svg+xml" data="<?php echo $img_src;?>/http-auth.svg" width="128" height="128"></object>
-			</div>
+          <div class="float">
+            <object type="image/svg+xml" data="<?php esc_html_e( $img_src . '/http-auth.svg' ); ?>" width="128" height="128"></object>
+          </div>
 
-			<div class="product">
-				<h2><?php _e( 'More from YAS Global', 'http-auth' ); ?></h2>
-				<span><?php _e('Our List of Plugins provides the services which helps you to manage your site URLs(Permalinks), Prevent your site from XSS Attacks, Brute force attacks, increase your site visitors by adding Structured JSON Markup and so on.', 'http-auth' ); ?></span>
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/custom-permalinks.svg" />
-					</div>
+          <div class="product">
+            <h2>
+            <?php
+            esc_html_e( 'More from YAS Global', 'http-auth' );
+            ?>
+            </h2>
+            <span>
+            <?php
+            esc_html_e(
+                'Our List of Plugins provides the services which helps you to manage your site URLs(Permalinks), Prevent your site from XSS Attacks, change absolute paths to relative, increase your site visitors by adding Structured JSON Markup and so on.',
+                'http-auth'
+            );
+            ?>
+            </span>
 
-					<h3><?php _e( 'Custom Permalinks', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Custom Permalinks helps you to make your permalinks customized for <em>individual</em> posts, pages, tags or categories. It will <strong>NOT</strong> apply whole permalink structures, or automatically apply a category\'s custom permalink to the posts within that category.', 'http-auth' ); ?></p>
-					<a href="https://www.custompermalinks.com/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box recommended">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/custom-permalinks.svg' ); ?>" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/permalinks-customizer.svg" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'Custom Permalinks', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e( 'Custom Permalinks helps you to make your permalinks customized for <em>individual</em> posts, pages, tags or categories. It will <strong>NOT</strong> apply whole permalink structures, or automatically apply a category\'s custom permalink to the posts within that category.', 'http-auth' );
+              ?>
+              </p>
+              <a href="https://www.custompermalinks.com/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'Permalinks Customizer', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Allows you to either define different Permalink Structure or define same Permalink Structure for default and Custom PostTypes, Taxonomies. Plugin automatically creates the user-friendly URLs as per your defined structured that can be edited from the single post/page.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/permalinks-customizer/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box recommended">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/prevent-xss-vulnerability.png' ); ?>" style="transform:scale(1.5)" />
+              </div>
 
-				<div class="box recommended">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/prevent-xss-vulnerability.png" style="transform:scale(1.5)" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'Prevent XSS Vulnerability', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'Secure your site from the XSS Attacks so, your users won\'t lose any kind of information or not redirected to any other site by visiting to your site with the malicious code in the URL or so. In this way, users can open your site URLs without any hesitation.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/prevent-xss-vulnerability/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'Prevent XSS Vulnerability', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Secure your site from the <strong>XSS Attacks</strong> so, your users won\'t lose any kind of information or not redirected to any other site by visiting to your site with the <strong>malicious code</strong> in the URL or so. In this way, users can open your site URLs without any hesitation.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/prevent-xss-vulnerability/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/make-paths-relative.svg' ); ?>" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/schema-for-article.svg" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'Make Paths Relative', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'Convert the paths(URLs) to relative instead of absolute. You can make Post, Category, Archive, Image URLs and Script and Style src as per your requirement. You can choose which you want to be relative from the settings Page.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/make-paths-relative/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'SCHEMA for Article', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Simply the easiest solution to add valid schema.org as a JSON script in the head of blog posts or articles. You can choose the schema either to show with the type of Article or NewsArticle from the settings page.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/schema-for-article/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/schema-for-article.svg' ); ?>" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/make-paths-relative.svg" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'SCHEMA for Article', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'Simply the easiest solution to add valid schema.org as a JSON script in the head of blog posts or articles. You can choose the schema either to show with the type of Article or NewsArticle from the settings page.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/schema-for-article/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'Make Paths Relative', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Convert the paths(URLs) to relative instead of absolute. You can make <strong>Post</strong>, <strong>Category</strong>, <strong>Archive</strong>, <strong>Image</strong> URLs and <strong>Script</strong> and <strong>Style</strong> src as per your requirement. You can choose which you want to be relative from the settings Page.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/make-paths-relative/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/remove-links-and-scripts.svg' ); ?>" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/json-structuring-markup.svg" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'Remove Links and Scripts', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'It removes some meta data from the wordpress header so, your header keeps clean of useless information like shortlink, rsd_link, wlwmanifest_link, emoji_scripts, wp_embed, wp_json, emoji_styles, generator and so on.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/remove-links-and-scripts/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'JSON Structuring Markup', 'http-auth' ); ?></h3>
-					<p><?php _e( 'Simply the easiest solution to add valid schema.org as a JSON script in the head of posts and pages. It provides you multiple <strong>SCHEMA</strong> types like Article, News Article, Organization and Website Schema.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/json-structuring-markup/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/media-post-permalink.png' ); ?>" style="transform:scale(1.5)" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/remove-links-and-scripts.svg" />
-					</div>
+              <h3>
+              <?php
+              esc_html_e( 'Media Post Permalink', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'On uploading any image, let\'s say services.png, WordPress creates the attachment post with the permalink of /services/ and doesn\'t allow you to use that permalink to point your page. In this case, we come up with this great solution.',
+                   'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/media-post-permalink/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
 
-					<h3><?php _e( 'Remove Links and Scripts', 'http-auth' ); ?></h3>
-					<p><?php _e( 'It removes some meta data from the wordpress header so, your header keeps clean of useless information like <strong>shortlink</strong>, <strong>rsd_link</strong>, <strong>wlwmanifest_link</strong>, <strong>emoji_scripts</strong>, <strong>wp_embed</strong>, <strong>wp_json</strong>, <strong>emoji_styles</strong>, <strong>generator</strong> and so on.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/remove-links-and-scripts/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
+            <div class="box">
+              <div class="img">
+                <img src="<?php esc_html_e( $img_src . '/json-structuring-markup.svg' ); ?>" />
+              </div>
 
-				<div class="box">
-					<div class="img">
-						<img src= "<?php echo $img_src; ?>/media-post-permalink.png" style="transform:scale(1.5)" />
-					</div>
-
-					<h3><?php _e( 'Media Post Permalink', 'http-auth' ); ?></h3>
-					<p><?php _e( 'On uploading  any image,  let\'s say services.png, WordPress creates the <strong>attachment post</strong> with the permalink of <strong>/services/</strong> and doesn\'t allow you to use that permalink to point your page. In this case, we comes up with this great solution.', 'http-auth' ); ?></p>
-					<a href="https://wordpress.org/plugins/media-post-permalink/" class="checkout-button" target="_blank"><?php echo $button_text; ?></a>
-				</div>
-			</div>
-		</div>
-		<?php
-	}
+              <h3>
+              <?php
+              esc_html_e( 'JSON Structuring Markup', 'http-auth' );
+              ?>
+              </h3>
+              <p>
+              <?php
+              esc_html_e(
+                  'Simply the easiest solution to add valid schema.org as a JSON script in the head of posts and pages. It provides you multiple SCHEMA types like Article, News Article, Organization and Website Schema.',
+                  'http-auth'
+              );
+              ?>
+              </p>
+              <a href="https://wordpress.org/plugins/json-structuring-markup/" class="checkout-button" target="_blank">
+                <?php esc_html_e( 'Check it out', 'http-auth' ); ?>
+              </a>
+            </div>
+          </div>
+        </div>
+        <?php
+    }
 }
