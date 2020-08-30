@@ -44,6 +44,127 @@ class HTTP_Auth_Settings
     }
 
     /**
+     * Generate Credentials section HTML.
+     *
+     * @access private
+     * @since 1.0.0
+     *
+     * @param string $username HTTP Auth Username.
+     * @param string $password HTTP Auth Password.
+     */
+    private function get_credentials_output( $username, $password )
+    {
+    ?>
+        <table class="http-auth-table">
+          <caption>
+            <?php
+              esc_html_e( 'Credentials', 'http-auth' );
+            ?>
+          </caption>
+          <tbody>
+            <tr>
+              <th>
+              <?php
+                esc_html_e( 'Username :', 'http-auth' );
+              ?>
+              </th>
+              <td>
+                <input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
+              </td>
+            </tr>
+            <tr>
+              <th>
+              <?php
+                esc_html_e( 'Password :', 'http-auth' );
+              ?>
+              </th>
+              <td>
+                <input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+    <?php
+    }
+
+    /**
+     * Generate Message section HTML.
+     *
+     * @access private
+     * @since 1.0.0
+     *
+     * @param string $message HTTP Auth Cancel message.
+     */
+    private function get_message_output( $message )
+    {
+    ?>
+        <table class="http-auth-table">
+          <caption>
+            <?php
+              esc_html_e( 'Message (Optional)', 'http-auth' );
+            ?>
+            </caption>
+          <tbody>
+            <tr>
+              <th>
+                <?php
+                  esc_html_e( 'Cancel Message :', 'http-auth' );
+                ?>
+              </th>
+              <td>
+                <textarea name="http_auth_message" rows="5" cols="45"><?php esc_html_e( $message ); ?></textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+    <?php
+    }
+
+    /**
+     * Generate for section HTML.
+     *
+     * @access private
+     * @since 1.0.0
+     *
+     * @param string $http_apply_site Applicable on site-wide.
+     * @param string $http_apply_admin Applicable on Admin pages only.
+     */
+    private function get_for_output( $http_apply_site, $http_apply_admin )
+    {
+    ?>
+        <table class="http-auth-table http-for">
+          <caption>
+            <?php
+              esc_html_e( 'For', 'http-auth' );
+            ?>
+          </caption>
+          <tbody>
+            <tr>
+              <td>
+                <input type="radio" name="http_auth_apply" value="site" <?php esc_html_e( $http_apply_site ); ?> />
+                <strong>
+                <?php
+                  esc_html_e( 'Complete Site', 'http-auth' );
+                ?>
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="radio" name="http_auth_apply" value="admin" <?php esc_html_e( $http_apply_admin ); ?> />
+                  <strong>
+                  <?php
+                    esc_html_e( 'Login and Admin Pages', 'http-auth' );
+                  ?>
+                  </strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+    <?php
+    }
+
+    /**
      * Save HTTP Auth Settings.
      *
      * @access private
@@ -100,7 +221,7 @@ class HTTP_Auth_Settings
     }
 
     /**
-     * HTTP Auth Settings
+     * HTTP Auth Settings.
      *
      * @access private
      * @since 0.1
@@ -119,7 +240,7 @@ class HTTP_Auth_Settings
             $username       = $get_settings['username'];
             $password       = $get_settings['password'];
             $message        = $get_settings['message'];
-            $applicable     = $get_settings['apply'];
+            $applicable     = $get_settings['http_auth_apply'];
             $auth_activated = $get_settings['activate'];
 
             if ( 'site' == $applicable ) {
@@ -143,86 +264,11 @@ class HTTP_Auth_Settings
               wp_nonce_field( 'http-auth-settings_' . $user_id,
                   '_http_auth_settings_nonce', true
               );
+
+              $this->get_credentials_output( $username, $password );
+              $this->get_message_output( $message );
+              $this->get_for_output( $http_apply_site, $http_apply_admin );
             ?>
-            <table class="http-auth-table">
-              <caption>
-                <?php
-                  esc_html_e( 'Credentials', 'http-auth' );
-                ?>
-              </caption>
-              <tbody>
-                <tr>
-                  <th>
-                  <?php
-                    esc_html_e( 'Username :', 'http-auth' );
-                  ?>
-                  </th>
-                  <td>
-                    <input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                  <?php
-                    esc_html_e( 'Password :', 'http-auth' );
-                  ?>
-                  </th>
-                  <td>
-                    <input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <table class="http-auth-table">
-              <caption>
-                <?php
-                  esc_html_e( 'Message (Optional)', 'http-auth' );
-                ?>
-                </caption>
-              <tbody>
-                <tr>
-                  <th>
-                    <?php
-                      esc_html_e( 'Cancel Message :', 'http-auth' );
-                    ?>
-                  </th>
-                  <td>
-                    <textarea name="http_auth_message" rows="5" cols="45"><?php esc_html_e( $message ); ?></textarea>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <table class="http-auth-table http-for">
-              <caption>
-                <?php
-                  esc_html_e( 'For', 'http-auth' );
-                ?>
-              </caption>
-              <tbody>
-                <tr>
-                  <td>
-                    <input type="radio" name="http_auth_apply" value="site" <?php esc_html_e( $http_apply_site ); ?> />
-                    <strong>
-                    <?php
-                      esc_html_e( 'Complete Site', 'http-auth' );
-                    ?>
-                    </strong>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <input type="radio" name="http_auth_apply" value="admin" <?php esc_html_e( $http_apply_admin ); ?> />
-                      <strong>
-                      <?php
-                        esc_html_e( 'Login and Admin Pages', 'http-auth' );
-                      ?>
-                      </strong>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
 
             <table class="http-auth-table">
               <tbody>
