@@ -181,11 +181,11 @@ class HTTP_Auth_Settings
             )
         ) {
             $http_settings = array(
-                'username'        => '',
-                'password'        => '',
-                'message'         => '',
-                'http_auth_apply' => 'site',
-                'activate'        => 'off',
+                'username' => '',
+                'password' => '',
+                'message'  => '',
+                'apply'    => 'site',
+                'activate' => 'off',
             );
 
             $activate_auth = filter_input( INPUT_POST, 'http_auth_activate' );
@@ -199,7 +199,7 @@ class HTTP_Auth_Settings
             }
 
             if ( $set_apply && 'admin' === $set_apply ) {
-                $http_settings['http_auth_apply'] = $set_apply;
+                $http_settings['apply'] = $set_apply;
             }
 
             if ( $set_message ) {
@@ -240,7 +240,7 @@ class HTTP_Auth_Settings
             $username       = $get_settings['username'];
             $password       = $get_settings['password'];
             $message        = $get_settings['message'];
-            $applicable     = $get_settings['http_auth_apply'];
+            $applicable     = $get_settings['apply'];
             $auth_activated = $get_settings['activate'];
 
             if ( 'site' == $applicable ) {
