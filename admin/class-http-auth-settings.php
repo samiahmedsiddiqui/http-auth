@@ -103,11 +103,11 @@ class HTTP_Auth_Settings
         $http_apply_site  = '';
         $get_settings     = unserialize( get_option( 'http_auth_settings' ) );
         $user_id          = get_current_user_id();
-        $username = $password = $message = $http_activated_checked = '';
+        $username = $password = $message = $http_activated = '';
 
         if ( isset( $get_settings ) && ! empty( $get_settings ) ) {
-            $username       = esc_attr( $get_settings['username'] );
-            $password       = esc_attr( $get_settings['password'] );
+            $username       = $get_settings['username'];
+            $password       = $get_settings['password'];
             $message        = $get_settings['message'];
             $applicable     = $get_settings['apply'];
             $auth_activated = $get_settings['activate'];
@@ -118,7 +118,7 @@ class HTTP_Auth_Settings
             }
 
             if ( 'on' == $auth_activated ) {
-                $http_activated_checked = 'checked';
+                $http_activated = 'checked';
             }
         }
         ?>
@@ -148,7 +148,7 @@ class HTTP_Auth_Settings
                   ?>
                   </th>
                   <td>
-                    <input type="text" name="http_auth_username" value="<?php echo $username; ?>" class="regular-text" required />
+                    <input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
                   </td>
                 </tr>
                 <tr>
@@ -158,7 +158,7 @@ class HTTP_Auth_Settings
                   ?>
                   </th>
                   <td>
-                    <input type="password" name="http_auth_password" value="<?php echo $password; ?>" class="regular-text" required />
+                    <input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
                   </td>
                 </tr>
               </tbody>
@@ -197,7 +197,7 @@ class HTTP_Auth_Settings
               <tbody>
                 <tr>
                   <td>
-                    <input type="radio" name="http_auth_apply" value="site" <?php echo $http_apply_site; ?> />
+                    <input type="radio" name="http_auth_apply" value="site" <?php esc_html_e( $http_apply_site ); ?> />
                     <strong>
                     <?php
                       esc_html_e( 'Complete Site', 'http-auth' );
@@ -207,7 +207,7 @@ class HTTP_Auth_Settings
                 </tr>
                 <tr>
                   <td>
-                    <input type="radio" name="http_auth_apply" value="admin" <?php echo $http_apply_admin ?> />
+                    <input type="radio" name="http_auth_apply" value="admin" <?php esc_html_e( $http_apply_admin ); ?> />
                       <strong>
                       <?php
                         esc_html_e( 'Login and Admin Pages', 'http-auth' );
@@ -222,7 +222,7 @@ class HTTP_Auth_Settings
               <tbody>
                 <tr>
                   <td>
-                    <input type="checkbox" name="http_auth_activate" value="on" <?php echo $http_activated_checked; ?> />
+                    <input type="checkbox" name="http_auth_activate" value="on" <?php esc_html_e( $http_activated ); ?> />
                     <strong>
                       <?php
                         esc_html_e( 'Activate', 'http-auth' );
