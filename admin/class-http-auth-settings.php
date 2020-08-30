@@ -15,6 +15,35 @@ class HTTP_Auth_Settings
     }
 
     /**
+     * Check server software if apache then add HTTP Auth config in .htaccess file.
+     *
+     * @access private
+     * @since 1.0.0
+     */
+    private function apache_config()
+    {
+        if ( isset( $_SERVER['SERVER_SOFTWARE'] )
+            && 'apache' === strtolower( $_SERVER['SERVER_SOFTWARE'] )
+        ) {
+            $filename    = ABSPATH . '.htaccess';
+            $get_content = file_get_contents( $filename, true );
+            if ( false !== $get_content ) {
+                if ( false === strpos( $get_content, '# BEGIN HTTP Auth' ) ) {
+                    $http_rule  = PHP_EOL . '# BEGIN HTTP Auth';
+                    $http_rule .= PHP_EOL . '<IfModule mod_rewrite.c>';
+                    $http_rule .= PHP_EOL . 'RewriteEngine on';
+                    $http_rule .= PHP_EOL . 'RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]';
+                    $http_rule .= PHP_EOL . '</IfModule>';
+                    $http_rule .= PHP_EOL . '# END HTTP Auth';
+                    $http_rule .= PHP_EOL;
+
+                    file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
+                }
+            }
+        }
+    }
+
+    /**
      * Save HTTP Auth Settings.
      *
      * @access private
@@ -53,7 +82,7 @@ class HTTP_Auth_Settings
             }
 
             if ( $set_message ) {
-                $http_settings['message'] = esc_html( $set_message );
+                $http_settings['message'] = esc_html( trim( $set_message ) );
             }
 
             if ( $set_password ) {
@@ -66,26 +95,7 @@ class HTTP_Auth_Settings
 
             update_option( 'http_auth_settings', serialize( $http_settings ) );
 
-            if ( 'apache' == strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
-                $filename    = ABSPATH . '.htaccess';
-                $get_content = file_get_contents( $filename, true );
-                if ( $get_content !== false ) {
-                    if ( strpos( $get_content, '# BEGIN HTTP Auth' ) === false ) {
-                        $htaccess = fopen( $filename, 'a+' ) or die( 'Unable to open file!' );
-                        $http_rule  = PHP_EOL;
-                        $http_rule .= PHP_EOL . '# BEGIN HTTP Auth';
-                        $http_rule .= PHP_EOL . '<IfModule mod_rewrite.c>';
-                        $http_rule .= PHP_EOL . 'RewriteEngine on';
-                        $http_rule .= PHP_EOL . 'RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]';
-                        $http_rule .= PHP_EOL . '</IfModule>';
-                        $http_rule .= PHP_EOL . '# END HTTP Auth';
-                        $http_rule .= PHP_EOL;
-
-                        fwrite( $htaccess, $http_rule );
-                        fclose( $htaccess );
-                    }
-                }
-            }
+            $this->apache_config();
         }
     }
 
@@ -178,11 +188,7 @@ class HTTP_Auth_Settings
                     ?>
                   </th>
                   <td>
-                    <textarea name="http_auth_message" rows="5" cols="45">
-                    <?php
-                      esc_html_e( $message );
-                    ?>
-                    </textarea>
+                    <textarea name="http_auth_message" rows="5" cols="45"><?php esc_html_e( $message ); ?></textarea>
                   </td>
                 </tr>
               </tbody>
