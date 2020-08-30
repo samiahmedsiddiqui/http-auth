@@ -33,15 +33,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Make sure we don't expose any info if called directly
-if ( ! defined( 'ABSPATH' ) ) {
-    esc_html_e(
-        'Hi there! I\'m just a plugin, not much I can do when called directly.',
-        'http-auth'
-    );
-    exit;
-}
-
 final class HTTP_Auth
 {
 
@@ -120,4 +111,7 @@ final class HTTP_Auth
     }
 }
 
-new HTTP_Auth();
+// Make sure we don't expose any info if called directly
+if ( defined( 'ABSPATH' ) ) {
+    new HTTP_Auth();
+}
