@@ -9,6 +9,6 @@
  */
 
 if ( defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-    delete_option( 'http_auth_settings' );
-    delete_option( 'http_auth_plugin_version' );
+	delete_option( 'http_auth_settings' );
+	delete_option( 'http_auth_plugin_version' );
 }
