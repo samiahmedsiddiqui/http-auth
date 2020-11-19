@@ -1,3 +1,9 @@
+# Composer
+/vendor/
+
+# Composer Lock
+composer.lock
+
 # Editors
 project.xml
 project.properties
