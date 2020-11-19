@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="HTTP Auth">
+    <description>HTTP Auth rules for PHP_CodeSniffer</description>
+
+    <file>.</file>
+
+    <!-- Exclude dependency related files and generated files from being scanned. -->
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>index.php</exclude-pattern>
+
+    <!-- Only check PHP files. -->
+    <arg name="extensions" value="php"/>
+
+    <!-- Strip the filepaths down to the relevant bit. -->
+    <arg name="basepath" value="."/>
+
+    <!-- Show results with colors. -->
+    <arg name="colors"/>
+
+    <!-- Show progress, show the error codes for each message (source). -->
+    <arg value="sp"/>
+
+    <!-- Run against the PHPCompatibilityWP ruleset. -->
+    <rule ref="PHPCompatibilityWP"/>
+
+		<!-- Run against the WordPress ruleset. -->
+    <rule ref="WordPress"/>
+
+		<!-- Check for cross-version support for PHP 5.4 and higher. -->
+    <config name="testVersion" value="5.4-"/>
+
+</ruleset>
