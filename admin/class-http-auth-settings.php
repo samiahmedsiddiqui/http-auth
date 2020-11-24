@@ -25,7 +25,7 @@ class HTTP_Auth_Settings {
 	 * Check server software if apache then add HTTP Auth config in .htaccess file.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 */
 	private function apache_config() {
 		if ( isset( $_SERVER['SERVER_SOFTWARE'] )
@@ -53,7 +53,7 @@ class HTTP_Auth_Settings {
 	 * Generate Credentials section HTML.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 *
 	 * @param string $username HTTP Auth Username.
 	 * @param string $password HTTP Auth Password.
@@ -96,7 +96,7 @@ class HTTP_Auth_Settings {
 	 * Generate Message section HTML.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 *
 	 * @param string $message HTTP Auth Cancel message.
 	 */
@@ -130,7 +130,7 @@ class HTTP_Auth_Settings {
 	 * Generate for section HTML.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 *
 	 * @param string $http_apply_site Applicable on site-wide.
 	 * @param string $http_apply_admin Applicable on Admin pages only.
@@ -173,7 +173,7 @@ class HTTP_Auth_Settings {
 	 * Save HTTP Auth Settings.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 */
 	private function save_settings() {
 		$form_submit = filter_input( INPUT_POST, 'submit' );
@@ -229,7 +229,7 @@ class HTTP_Auth_Settings {
 	 * HTTP Auth Settings.
 	 *
 	 * @access private
-	 * @since 0.1
+	 * @since  0.1
 	 */
 	private function http_auth_configs() {
 		$this->save_settings();

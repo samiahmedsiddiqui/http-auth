@@ -5,7 +5,7 @@
  * Deletes Settings on uninstalling the Plugin.
  *
  * @package HTTPAuth
- * @since 1.0.0
+ * @since   1.0.0
  */
 
 if ( defined( 'WP_UNINSTALL_PLUGIN' ) ) {

@@ -26,7 +26,7 @@ class HTTP_Auth_Frontend {
 	 * requests, cancelled message shows up with 401 Unauthorized status.
 	 *
 	 * @access private
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 *
 	 * @param array $auth_settings configured settings for the plugin.
 	 */
@@ -61,9 +61,9 @@ class HTTP_Auth_Frontend {
 	 * To unauthenticated requests, this page shows ups.
 	 *
 	 * @access private
-	 * @since 0.1
+	 * @since  0.1
 	 *
-	 * @param string $message Configured or Default message that is going to show on the Canel page.
+	 * @param string $message Configured or Default message that is going to show on the Cancel page.
 	 *
 	 * @return string Cancel page HTML.
 	 */
@@ -88,7 +88,7 @@ class HTTP_Auth_Frontend {
 	 * Check HTTP Auth activated and then apply HTTP Authentication.
 	 *
 	 * @access public
-	 * @since 0.1
+	 * @since  0.1
 	 */
 	public function add_restriction() {
 		$get_settings = get_option( 'http_auth_settings' );

@@ -36,7 +36,7 @@ class HTTP_Auth_Admin {
 	 * Added Pages in Dashboard Menu for Settings.
 	 *
 	 * @access public
-	 * @since 0.1
+	 * @since  0.1
 	 */
 	public function admin_menu() {
 		add_menu_page(
@@ -77,7 +77,7 @@ class HTTP_Auth_Admin {
 	 * Add about page style.
 	 *
 	 * @access public
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 */
 	public function add_about_style() {
 		$filename   = 'about-plugins' . $this->css_suffix;
@@ -92,7 +92,7 @@ class HTTP_Auth_Admin {
 	 * Add settings page style.
 	 *
 	 * @access public
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 */
 	public function add_settings_page_style() {
 		$filename   = 'admin-style' . $this->css_suffix;
@@ -108,7 +108,7 @@ class HTTP_Auth_Admin {
 	 * add custom message and choose where to apply the plugin.
 	 *
 	 * @access public
-	 * @since 0.1
+	 * @since  0.1
 	 */
 	public function admin_settings_page() {
 		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-settings.php';
@@ -121,7 +121,7 @@ class HTTP_Auth_Admin {
 	 * Add About Plugins Page
 	 *
 	 * @access public
-	 * @since 0.3
+	 * @since  0.3
 	 */
 	public function about_plugin() {
 		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-about.php';
@@ -134,7 +134,7 @@ class HTTP_Auth_Admin {
 	 * Add Plugin Support and Follow Message in the footer of Admin Pages.
 	 *
 	 * @access public
-	 * @since 0.3
+	 * @since  0.3
 	 *
 	 * @return string
 	 */
@@ -158,7 +158,7 @@ class HTTP_Auth_Admin {
 	 * the Plugin Name.
 	 *
 	 * @access public
-	 * @since 0.3
+	 * @since  0.3
 	 *
 	 * @param array $links Contains the Plugin Basic Link (Activate/Deactivate/Delete)
 	 *

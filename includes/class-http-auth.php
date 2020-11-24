@@ -32,7 +32,7 @@ final class HTTP_Auth {
 	/**
 	 * Define HTTP Auth Constants.
 	 *
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 * @access private
 	 */
 	private function define_constants() {
@@ -44,7 +44,7 @@ final class HTTP_Auth {
 	/**
 	 * Define constant if not set already.
 	 *
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 * @access private
 	 *
 	 * @param string      $name  Constant name.
@@ -59,7 +59,7 @@ final class HTTP_Auth {
 	/**
 	 * Include required core files used in admin and on the frontend.
 	 *
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 * @access private
 	 */
 	private function includes() {
@@ -73,7 +73,7 @@ final class HTTP_Auth {
 	/**
 	 * Hook into actions and filters.
 	 *
-	 * @since 1.0.0
+	 * @since  1.0.0
 	 * @access private
 	 */
 	private function init_hooks() {
@@ -84,7 +84,7 @@ final class HTTP_Auth {
 	 * Add textdomain hook for translation.
 	 *
 	 * @access public
-	 * @since 0.3
+	 * @since  0.3
 	 */
 	public function load_textdomain() {
 		/*

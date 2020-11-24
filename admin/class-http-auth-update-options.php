@@ -25,7 +25,7 @@ class HTTP_Auth_Update_Options {
 	 * Add multiple fields data to single row using serialize it.
 	 *
 	 * @access private
-	 * @since 0.3
+	 * @since  0.3
 	 */
 	private function update_options() {
 		$apply    = get_option( 'http_auth_apply' );
