@@ -140,11 +140,15 @@ class HTTP_Auth_Admin {
 	 */
 	public function admin_footer_text() {
 		$footer_text = sprintf(
+			/*
+			 * translators: Do not translate placeholders, they are replaced with the
+			 * appropriate links and plugin version.
+			 */
 			__(
 				'HTTP Auth version %1$s by <a href="%2$s" title="YAS Global Website" target="_blank">YAS Global</a> - <a href="%3$s" title="Support forums" target="_blank">Support forums</a> - Follow on Twitter: <a href="%4$s" title="Follow YAS Global on Twitter" target="_blank">YAS Global</a>',
 				'http-auth'
 			),
-			HTTP_AUTH_PLUGIN_VERSION,
+			HTTP_AUTH_VERSION,
 			'https://www.yasglobal.com',
 			'https://wordpress.org/support/plugin/http-auth',
 			'https://twitter.com/samisiddiqui91'
@@ -165,21 +169,27 @@ class HTTP_Auth_Admin {
 	 * @return array $links Add links in the array and return it.
 	 */
 	public function settings_link( $links ) {
-		$about    = sprintf(
+		$about = sprintf(
+			// translators: Placeholder replaced with the `About` page link.
 			__( '<a href="%s" title="About">About</a>', 'http-auth' ),
 			'admin.php?page=http-auth-about-plugins'
 		);
-		$contact  = sprintf(
+
+		$contact = sprintf(
+			// translators: Placeholder replaced with the external `Contact` page link.
 			__(
 				'<a href="%s" title="Contact" target="_blank">Contact</a>',
 				'http-auth'
 			),
 			'https://www.yasglobal.com/#request-form'
 		);
+
 		$settings = sprintf(
+			// translators: Placeholder replaced with the `Settings` page link.
 			__( '<a href="%s" title="Settings">Settings</a>', 'http-auth' ),
 			'admin.php?page=http-auth-settings'
 		);
+
 		array_unshift( $links, $settings );
 		array_unshift( $links, $contact );
 		array_unshift( $links, $about );
