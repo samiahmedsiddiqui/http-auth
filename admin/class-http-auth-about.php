@@ -38,7 +38,7 @@ class HTTP_Auth_About {
 				<h1>
 				<?php
 				esc_html_e( 'HTTP Auth', 'http-auth' );
-				esc_html_e( ' v1.7.1' );
+				esc_html_e( ' v' . HTTP_AUTH_VERSION );
 				?>
 				</h1>
 				<div class="tagline">

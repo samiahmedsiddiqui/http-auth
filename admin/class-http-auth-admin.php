@@ -80,12 +80,9 @@ class HTTP_Auth_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_about_style() {
-		$filename   = 'about-plugins' . $this->css_suffix;
-		$plugin_url = plugins_url( '/admin', HTTP_AUTH_FILE );
-		wp_enqueue_style(
-			'http-auth-about-style',
-			$plugin_url . '/css/' . $filename
-		);
+		$filename = 'about-plugins' . $this->css_suffix;
+		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
+		wp_enqueue_style( 'http-auth-about-style', $css_url . $filename );
 	}
 
 	/**
@@ -96,11 +93,8 @@ class HTTP_Auth_Admin {
 	 */
 	public function add_settings_page_style() {
 		$filename   = 'admin-style' . $this->css_suffix;
-		$plugin_url = plugins_url( '/admin', HTTP_AUTH_FILE );
-		wp_enqueue_style(
-			'http-auth-settings-style',
-			$plugin_url . '/css/' . $filename
-		);
+		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
+		wp_enqueue_style( 'http-auth-settings-style', $css_url . $filename );
 	}
 
 	/**
