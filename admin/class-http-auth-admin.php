@@ -13,14 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Create admin menu, footer text, settings links etc.
  */
 class HTTP_Auth_Admin {
-
-	/**
-	 * Css file suffix (version number with with extension)
-	 *
-	 * @var string
-	 */
-	private $css_suffix = '-' . HTTP_AUTH_VERSION . '.min.css';
-
 	/**
 	 * Initializes WordPress hooks.
 	 */
@@ -80,9 +72,14 @@ class HTTP_Auth_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_about_style() {
-		$filename = 'about-plugins' . $this->css_suffix;
+		$filename = 'about-plugins-' . HTTP_AUTH_VERSION . '.min.css';
 		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
-		wp_enqueue_style( 'http-auth-about-style', $css_url . $filename );
+		wp_enqueue_style(
+			'http-auth-about-style',
+			$css_url . $filename,
+			array(),
+			HTTP_AUTH_VERSION
+		);
 	}
 
 	/**
@@ -92,9 +89,14 @@ class HTTP_Auth_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_settings_page_style() {
-		$filename = 'admin-style' . $this->css_suffix;
+		$filename = 'admin-style-' . HTTP_AUTH_VERSION . '.min.css';
 		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
-		wp_enqueue_style( 'http-auth-settings-style', $css_url . $filename );
+		wp_enqueue_style(
+			'http-auth-settings-style',
+			$css_url . $filename,
+			array(),
+			HTTP_AUTH_VERSION
+		);
 	}
 
 	/**
@@ -159,7 +161,7 @@ class HTTP_Auth_Admin {
 	 * @access public
 	 * @since  0.3
 	 *
-	 * @param array $links Contains the Plugin Basic Link (Activate/Deactivate/Delete)
+	 * @param array $links Contains the Plugin Basic Links.
 	 *
 	 * @return array $links Add links in the array and return it.
 	 */
