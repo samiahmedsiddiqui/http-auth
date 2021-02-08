@@ -87,14 +87,6 @@ final class HTTP_Auth {
 	 * @since  0.3
 	 */
 	public function load_textdomain() {
-		/*
-		No longer needed, will be removed in next version.
-		if ( '0.3' > get_option( 'http_auth_plugin_version' ) ) {
-			include_once HTTP_AUTH_PATH . 'admin/class-http-auth-update-options.php';
-			new HTTP_Auth_Update_Options();
-		}
-		*/
-
 		$dirname = rtrim( HTTP_AUTH_PATH, '/' );
 
 		load_plugin_textdomain(

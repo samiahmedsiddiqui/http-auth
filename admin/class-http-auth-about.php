@@ -30,15 +30,15 @@ class HTTP_Auth_About {
 	 * @return void
 	 */
 	private function more_plugins() {
-		$img_src = plugins_url( '/assets/images', CUSTOM_PERMALINKS_FILE )
+		$img_src = plugins_url( '/assets/images', HTTP_AUTH_FILE );
 		?>
 
 		<div class="wrap">
 			<div class="float">
 				<h1>
 				<?php
-				esc_html_e( 'HTTP Auth', 'http-auth' );
-				esc_html_e( ' v' . HTTP_AUTH_VERSION );
+				esc_html_e( 'HTTP Auth v', 'http-auth' );
+				esc_html_e( HTTP_AUTH_VERSION );
 				?>
 				</h1>
 				<div class="tagline">

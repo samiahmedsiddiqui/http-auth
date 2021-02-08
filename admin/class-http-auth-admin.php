@@ -92,7 +92,7 @@ class HTTP_Auth_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_settings_page_style() {
-		$filename   = 'admin-style' . $this->css_suffix;
+		$filename = 'admin-style' . $this->css_suffix;
 		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
 		wp_enqueue_style( 'http-auth-settings-style', $css_url . $filename );
 	}
@@ -135,8 +135,9 @@ class HTTP_Auth_Admin {
 	public function admin_footer_text() {
 		$footer_text = sprintf(
 			/*
-			 * translators: Do not translate placeholders, they are replaced with the
-			 * appropriate links and plugin version.
+			 * translators: %1$s replace with Plugin Version, %2$s replace with
+			 * YAS Global link, %3$s replace with WP HTTP Auth link and %4$s replace
+			 * with Twitter link.
 			 */
 			__(
 				'HTTP Auth version %1$s by <a href="%2$s" title="YAS Global Website" target="_blank">YAS Global</a> - <a href="%3$s" title="Support forums" target="_blank">Support forums</a> - Follow on Twitter: <a href="%4$s" title="Follow YAS Global on Twitter" target="_blank">YAS Global</a>',
@@ -164,13 +165,13 @@ class HTTP_Auth_Admin {
 	 */
 	public function settings_link( $links ) {
 		$about = sprintf(
-			// translators: Placeholder replaced with the `About` page link.
+			// translators: %s replace with the `About` page link.
 			__( '<a href="%s" title="About">About</a>', 'http-auth' ),
 			'admin.php?page=http-auth-about-plugins'
 		);
 
 		$contact = sprintf(
-			// translators: Placeholder replaced with the external `Contact` page link.
+			// translators: %s replace with the external `Contact` page link.
 			__(
 				'<a href="%s" title="Contact" target="_blank">Contact</a>',
 				'http-auth'
@@ -179,7 +180,7 @@ class HTTP_Auth_Admin {
 		);
 
 		$settings = sprintf(
-			// translators: Placeholder replaced with the `Settings` page link.
+			// translators: %s replace with the `Settings` page link.
 			__( '<a href="%s" title="Settings">Settings</a>', 'http-auth' ),
 			'admin.php?page=http-auth-settings'
 		);
