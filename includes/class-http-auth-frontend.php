@@ -46,42 +46,21 @@ class HTTP_Auth_Frontend {
 			&& $asked_password === $auth_settings['password'] )
 		) {
 			$message = $auth_settings['message'];
+			$title   = get_bloginfo( 'name' ) . ' | Restricted Site';
 			header( 'WWW-Authenticate: Basic realm="Restricted Site"' );
-			header( 'HTTP/1.0 401 Unauthorized' );
 
 			if ( empty( $message ) ) {
 				$message = 'This Site is Restricted. Please contact the administrator for access.';
 			}
 
-			die( $this->cancel_page( $message ) );
+			wp_die(
+				$message,
+				$title,
+				array(
+					'response' => 401,
+				)
+			);
 		}
-	}
-
-	/**
-	 * To unauthenticated requests, this page shows ups.
-	 *
-	 * @access private
-	 * @since  0.1
-	 *
-	 * @param string $message Configured or Default message that is going to show on the Cancel page.
-	 *
-	 * @return string Cancel page HTML.
-	 */
-	private function cancel_page( $message ) {
-		$css_file   = '/css/style-' . HTTP_AUTH_PLUGIN_VERSION . '.min.css';
-		$sitename   = get_bloginfo( 'name' );
-		$style_path = plugins_url( '/frontend', HTTP_AUTH_FILE ) . $css_file;
-
-		return '<html>' .
-						'<head>' .
-							'<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' .
-							'<title>' . $sitename . ' | Restricted Site</title>' .
-							'<link rel="stylesheet" href="' . $style_path . '" type="text/css">' .
-						'</head>' .
-						'<body class="http-restricted">' .
-							'<p>' . esc_html_e( $message, 'http-auth' ) . '</p>' .
-						'</body>' .
-					'</html>';
 	}
 
 	/**
