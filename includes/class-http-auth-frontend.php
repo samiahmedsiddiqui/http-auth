@@ -82,6 +82,15 @@ class HTTP_Auth_Frontend {
 						&& false === strpos( $_SERVER['REQUEST_URI'], '/wp-login' )
 					) {
 						return;
+					} elseif ( strpos( $_SERVER['REQUEST_URI'], '/wp-login' ) === 0 ) {
+						if ( isset( $_REQUEST['action'] )
+							&& $_REQUEST['action'] === 'logout'
+							&& isset( $_REQUEST['_wpnonce'] )
+						) {
+							return;
+						}
+					} elseif ( strpos( $_SERVER['REQUEST_URI'], '/wp-admin/admin-ajax.php' ) !== false ) {
+						return;
 					}
 				}
 
