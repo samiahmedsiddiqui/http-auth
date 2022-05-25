@@ -3,7 +3,7 @@ Contributors: aliya-yasir, sasiddiqui
 Donate link: https://www.paypal.me/yasglobal
 Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
 Requires at least: 3.5
-Tested up to: 5.2
+Tested up to: 6.0
 Stable tag: 0.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Keeps you to secure your whole site on the development time and admin pages from the Brute attack.
 
 == Description ==
-Enabling this plugin allows you to set up HTTP Authentication on your site. You can easily set username and password for HTTP Authentication. 
+Enabling this plugin allows you to set up HTTP Authentication on your site. You can easily set username and password for HTTP Authentication.
 
 This plugin helps:
 
@@ -63,7 +63,7 @@ This process defines you the steps to follow either you are installing through W
  * Update translation folder PATH and fixed spelling typo on about page
 
 = 0.3 =
- 
+
  * Enhancements
    * Added Apache (PHP CGI) Compatibility
    * Added Translation Capability
@@ -71,12 +71,12 @@ This process defines you the steps to follow either you are installing through W
    * Fixed PHP Notices
 
 = 0.2.1 =
- 
+
  * Fixed the security issues which may cause error when called directly
 
 = 0.2 =
- 
- * Add OOPS Concept to make the performance better 
+
+ * Add OOPS Concept to make the performance better
 
 = 0.1 =
 
