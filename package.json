@@ -1,6 +1,11 @@
 {
   "name": "http-auth",
   "description": "Development files for the HTTP Auth plugin.",
+  "scripts": {
+    "lint": "npm run lint:css",
+    "lint:css": "npx stylelint **/*.css",
+    "lint:css:fix": "npx stylelint **/*.css --fix"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yasglobal/http-auth.git"
@@ -10,12 +15,13 @@
   },
   "author": "Sami Ahmed Siddiqui",
   "devDependencies": {
-    "del": "^5.1.0",
+    "@wordpress/stylelint-config": "20.0.2",
+    "del": "5.1.0",
     "gulp": "4.0.2",
-    "gulp-clean-css": "4.2.0",
-    "gulp-rename": "1.4.0"
+    "gulp-clean-css": "4.3.0",
+    "gulp-rename": "2.0.0"
   },
-  "preventXssVulnerability": {
+  "httpAuth": {
     "pluginVersion": "0.3.2"
   }
 }
