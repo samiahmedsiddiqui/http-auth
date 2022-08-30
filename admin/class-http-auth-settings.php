@@ -117,6 +117,7 @@ class HTTP_Auth_Settings {
 					</th>
 					<td>
 						<textarea name="http_auth_message" rows="5" cols="45">
+              <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
 							<?php esc_html_e( $message ); ?>
 						</textarea>
 					</td>
@@ -146,6 +147,7 @@ class HTTP_Auth_Settings {
 			<tbody>
 				<tr>
 					<td>
+          <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
 					<input type="radio" name="http_auth_apply" value="site" <?php esc_html_e( $http_apply_site ); ?> />
 					<strong>
 					<?php
@@ -156,6 +158,7 @@ class HTTP_Auth_Settings {
 				</tr>
 				<tr>
 					<td>
+          <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
 					<input type="radio" name="http_auth_apply" value="admin" <?php esc_html_e( $http_apply_admin ); ?> />
 						<strong>
 						<?php
@@ -219,7 +222,7 @@ class HTTP_Auth_Settings {
 				$http_settings['username'] = esc_attr( $set_username );
 			}
 
-			update_option( 'http_auth_settings', serialize( $http_settings ) );
+			update_option( 'http_auth_settings', $http_settings );
 
 			$this->apache_config();
 		}
@@ -234,7 +237,7 @@ class HTTP_Auth_Settings {
 	private function http_auth_configs() {
 		$this->save_settings();
 
-		$get_settings     = unserialize( get_option( 'http_auth_settings' ) );
+		$get_settings     = get_option( 'http_auth_settings' );
 		$http_activated   = '';
 		$http_apply_admin = 'checked';
 		$http_apply_site  = '';
@@ -242,6 +245,10 @@ class HTTP_Auth_Settings {
 		$password         = '';
 		$user_id          = get_current_user_id();
 		$username         = '';
+
+		if ( is_string( $get_settings ) ) {
+			$get_settings = maybe_unserialize( $get_settings );
+		}
 
 		if ( isset( $get_settings ) && ! empty( $get_settings ) ) {
 			$applicable     = $get_settings['apply'];
@@ -283,6 +290,7 @@ class HTTP_Auth_Settings {
 				<tbody>
 					<tr>
 						<td>
+              <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
 							<input type="checkbox" name="http_auth_activate" value="on" <?php esc_html_e( $http_activated ); ?> />
 							<strong>
 								<?php

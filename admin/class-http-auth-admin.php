@@ -136,11 +136,7 @@ class HTTP_Auth_Admin {
 	 */
 	public function admin_footer_text() {
 		$footer_text = sprintf(
-			/*
-			 * translators: %1$s replace with Plugin Version, %2$s replace with
-			 * YAS Global link, %3$s replace with WP HTTP Auth link and %4$s replace
-			 * with Twitter link.
-			 */
+			// translators: placeholders like %2$s replaced with the link.
 			__(
 				'HTTP Auth version %1$s by <a href="%2$s" title="YAS Global Website" target="_blank">YAS Global</a> - <a href="%3$s" title="Support forums" target="_blank">Support forums</a> - Follow on Twitter: <a href="%4$s" title="Follow YAS Global on Twitter" target="_blank">YAS Global</a>',
 				'http-auth'

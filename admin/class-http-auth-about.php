@@ -36,10 +36,14 @@ class HTTP_Auth_About {
 		<div class="wrap">
 			<div class="float">
 				<h1>
-				<?php
-				esc_html_e( 'HTTP Auth v', 'http-auth' );
-				esc_html_e( HTTP_AUTH_VERSION );
-				?>
+		<?php
+					esc_html_e(
+						// translators: After `v` there will be a Plugin version.
+						// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+						'HTTP Auth v' . HTTP_AUTH_VERSION,
+						'http-auth'
+					);
+		?>
 				</h1>
 				<div class="tagline">
 					<p>

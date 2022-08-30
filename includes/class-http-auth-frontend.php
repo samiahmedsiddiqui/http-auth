@@ -70,11 +70,16 @@ class HTTP_Auth_Frontend {
 	 * @since  0.1
 	 */
 	public function add_restriction() {
-		$get_settings = get_option( 'http_auth_settings' );
+		$get_settings  = get_option( 'http_auth_settings' );
+		$http_settings = array();
+		if ( is_string( $get_settings ) ) {
+			$http_settings = maybe_unserialize( $get_settings );
+		}
 
-		if ( isset( $get_settings ) && ! empty( $get_settings ) ) {
-			$http_settings = unserialize( $get_settings );
-			if ( 'on' === $http_settings['activate'] ) {
+		if ( isset( $_SERVER, $_SERVER['REQUEST_URI'] ) && is_array( $http_settings ) ) {
+			if ( isset( $http_settings['activate'] )
+			&& 'on' === $http_settings['activate']
+			) {
 				if ( isset( $http_settings['apply'] )
 					&& 'admin' === $http_settings['apply']
 				) {
@@ -82,25 +87,32 @@ class HTTP_Auth_Frontend {
 						&& false === strpos( $_SERVER['REQUEST_URI'], '/wp-login' )
 					) {
 						return;
-					} elseif ( strpos( $_SERVER['REQUEST_URI'], '/wp-login' ) === 0 ) {
-						if ( isset( $_REQUEST['action'] )
-							&& $_REQUEST['action'] === 'logout'
-							&& isset( $_REQUEST['_wpnonce'] )
+					} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-login' ) ) {
+						if ( isset( $_REQUEST, $_REQUEST['action'], $_REQUEST['_wpnonce'] )
+							&& 'logout' === $_REQUEST['action']
 						) {
 							return;
 						}
-					} elseif ( strpos( $_SERVER['REQUEST_URI'], '/wp-admin/admin-ajax.php' ) !== false ) {
+					} elseif ( false !== strpos( $_SERVER['REQUEST_URI'], '/wp-admin/admin-ajax.php' ) ) {
 						return;
 					}
 				}
 
-				if ( 'apache' === strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
-					list( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) = explode(
-						':',
-						base64_decode(
-							substr( $_SERVER['HTTP_AUTHORIZATION'], 6 )
-						)
-					);
+				if ( isset(
+					$_SERVER['HTTP_AUTHORIZATION'],
+					$_SERVER['SERVER_SOFTWARE'],
+					$_SERVER['PHP_AUTH_USER'],
+					$_SERVER['PHP_AUTH_PW']
+				)
+				) {
+					if ( 'apache' === strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
+						list( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) = explode(
+							':',
+							base64_decode(
+								substr( $_SERVER['HTTP_AUTHORIZATION'], 6 )
+							)
+						);
+					}
 				}
 
 				$this->apply_auth( $http_settings );
