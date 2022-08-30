@@ -1,0 +1,31 @@
+== Changelog ==
+
+This file contains only old changelog. See readme.txt for newer versions.
+
+= 0.3.2 =
+
+ * $this variable Notice in Static Method
+
+= 0.3.1 =
+
+ * Update translation folder PATH and fixed spelling typo on about page
+
+= 0.3 =
+
+ * Enhancements
+   * Added Apache (PHP CGI) Compatibility
+   * Added Translation Capability
+   * Optimize Query to make better performance
+   * Fixed PHP Notices
+
+= 0.2.1 =
+
+ * Fixed the security issues which may cause error when called directly
+
+= 0.2 =
+
+ * Add OOPS Concept to make the performance better
+
+= 0.1 =
+
+ * First release on wordpress.org
