@@ -43,6 +43,7 @@ class HTTP_Auth_Settings {
 					$http_rule .= PHP_EOL . '# END HTTP Auth';
 					$http_rule .= PHP_EOL;
 
+          // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 					file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
 				}
 			}

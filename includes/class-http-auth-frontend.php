@@ -54,8 +54,8 @@ class HTTP_Auth_Frontend {
 			}
 
 			wp_die(
-				$message,
-				$title,
+				esc_html( $message ),
+				esc_html( $title ),
 				array(
 					'response' => 401,
 				)
@@ -88,11 +88,13 @@ class HTTP_Auth_Frontend {
 					) {
 						return;
 					} elseif ( 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-login' ) ) {
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
 						if ( isset( $_REQUEST, $_REQUEST['action'], $_REQUEST['_wpnonce'] )
 							&& 'logout' === $_REQUEST['action']
 						) {
 							return;
 						}
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
 					} elseif ( false !== strpos( $_SERVER['REQUEST_URI'], '/wp-admin/admin-ajax.php' ) ) {
 						return;
 					}
@@ -108,6 +110,7 @@ class HTTP_Auth_Frontend {
 					if ( 'apache' === strtolower( $_SERVER['SERVER_SOFTWARE'] ) ) {
 						list( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) = explode(
 							':',
+              // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 							base64_decode(
 								substr( $_SERVER['HTTP_AUTHORIZATION'], 6 )
 							)
