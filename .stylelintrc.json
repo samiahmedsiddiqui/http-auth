@@ -1,0 +1,16 @@
+{
+  "extends": "@wordpress/stylelint-config",
+  "ignoreFiles": [
+    "**/*.min.css"
+  ],
+  "rules": {
+    "font-family-no-missing-generic-family-keyword": [
+      true,
+      {
+        "ignoreFontFamilies": [
+          "fontawesome"
+        ]
+      }
+    ]
+  }
+}
