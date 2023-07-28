@@ -28,23 +28,26 @@ class HTTP_Auth_Settings {
 	 * @since  1.0.0
 	 */
 	private function apache_config() {
-		if ( isset( $_SERVER['SERVER_SOFTWARE'] )
-			&& 'apache' === strtolower( $_SERVER['SERVER_SOFTWARE'] )
-		) {
-			$filename    = ABSPATH . '.htaccess';
-			$get_content = file_get_contents( $filename, true );
-			if ( false !== $get_content ) {
-				if ( false === strpos( $get_content, '# BEGIN HTTP Auth' ) ) {
-					$http_rule  = PHP_EOL . '# BEGIN HTTP Auth';
-					$http_rule .= PHP_EOL . '<IfModule mod_rewrite.c>';
-					$http_rule .= PHP_EOL . 'RewriteEngine on';
-					$http_rule .= PHP_EOL . 'RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]';
-					$http_rule .= PHP_EOL . '</IfModule>';
-					$http_rule .= PHP_EOL . '# END HTTP Auth';
-					$http_rule .= PHP_EOL;
+		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
+			$server_software = sanitize_text_field(
+				wp_unslash( $_SERVER['SERVER_SOFTWARE'] )
+			);
+			if ( 'apache' === strtolower( $server_software ) ) {
+				$filename    = ABSPATH . '.htaccess';
+				$get_content = file_get_contents( $filename, true );
+				if ( false !== $get_content ) {
+					if ( false === strpos( $get_content, '# BEGIN HTTP Auth' ) ) {
+						$http_rule  = PHP_EOL . '# BEGIN HTTP Auth';
+						$http_rule .= PHP_EOL . '<IfModule mod_rewrite.c>';
+						$http_rule .= PHP_EOL . 'RewriteEngine on';
+						$http_rule .= PHP_EOL . 'RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]';
+						$http_rule .= PHP_EOL . '</IfModule>';
+						$http_rule .= PHP_EOL . '# END HTTP Auth';
+						$http_rule .= PHP_EOL;
 
-          // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-					file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+						file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
+					}
 				}
 			}
 		}
@@ -118,8 +121,7 @@ class HTTP_Auth_Settings {
 					</th>
 					<td>
 						<textarea name="http_auth_message" rows="5" cols="45">
-              <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
-							<?php esc_html_e( $message ); ?>
+							<?php echo esc_html( $message ); ?>
 						</textarea>
 					</td>
 				</tr>
@@ -141,30 +143,22 @@ class HTTP_Auth_Settings {
 		?>
 		<table class="http-auth-table http-for">
 			<caption>
-			<?php
-				esc_html_e( 'For', 'http-auth' );
-			?>
+				<?php esc_html_e( 'For', 'http-auth' ); ?>
 			</caption>
 			<tbody>
 				<tr>
 					<td>
-          <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
-					<input type="radio" name="http_auth_apply" value="site" <?php esc_html_e( $http_apply_site ); ?> />
-					<strong>
-					<?php
-						esc_html_e( 'Complete Site', 'http-auth' );
-					?>
-					</strong>
+						<input type="radio" name="http_auth_apply" value="site" <?php echo esc_html( $http_apply_site ); ?> />
+						<strong>
+							<?php esc_html_e( 'Complete Site', 'http-auth' ); ?>
+						</strong>
 					</td>
 				</tr>
 				<tr>
 					<td>
-          <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
-					<input type="radio" name="http_auth_apply" value="admin" <?php esc_html_e( $http_apply_admin ); ?> />
+						<input type="radio" name="http_auth_apply" value="admin" <?php echo esc_html( $http_apply_admin ); ?> />
 						<strong>
-						<?php
-						esc_html_e( 'Login and Admin Pages', 'http-auth' );
-						?>
+							<?php esc_html_e( 'Login and Admin Pages', 'http-auth' ); ?>
 						</strong>
 					</td>
 				</tr>
@@ -291,8 +285,7 @@ class HTTP_Auth_Settings {
 				<tbody>
 					<tr>
 						<td>
-              <?php // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
-							<input type="checkbox" name="http_auth_activate" value="on" <?php esc_html_e( $http_activated ); ?> />
+							<input type="checkbox" name="http_auth_activate" value="on" <?php echo esc_html( $http_activated ); ?> />
 							<strong>
 								<?php
 								esc_html_e( 'Activate', 'http-auth' );
