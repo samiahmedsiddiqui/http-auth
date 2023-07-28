@@ -74,22 +74,16 @@ class HTTP_Auth_Frontend {
 	 * @since  0.1
 	 */
 	public function add_restriction() {
-		$get_settings  = get_option( 'http_auth_settings' );
-		$http_settings = array();
-		if ( is_string( $get_settings ) ) {
-			$http_settings = maybe_unserialize( $get_settings );
+		$http_settings = get_option( 'http_auth_settings' );
+		if ( is_string( $http_settings ) ) {
+			$http_settings = maybe_unserialize( $http_settings );
 		}
 
 		if ( isset( $_SERVER, $_SERVER['REQUEST_URI'] ) && is_array( $http_settings ) ) {
-			$request_uri = esc_url_raw(
-				wp_unslash( $_SERVER['REQUEST_URI'] )
-			);
-			if ( isset( $http_settings['activate'] )
-			&& 'on' === $http_settings['activate']
-			) {
-				if ( isset( $http_settings['apply'] )
-					&& 'admin' === $http_settings['apply']
-				) {
+			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
+			if ( isset( $http_settings['activate'] ) && 'on' === $http_settings['activate'] ) {
+				if ( isset( $http_settings['apply'] ) && 'admin' === $http_settings['apply'] ) {
 					if ( false === strpos( $request_uri, '/wp-admin' )
 						&& false === strpos( $request_uri, '/wp-login' )
 					) {
