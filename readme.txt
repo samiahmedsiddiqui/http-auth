@@ -2,8 +2,8 @@
 Contributors: aliya-yasir, sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
 Requires at least: 3.5
-Tested up to: 6.0
-Stable tag: 0.3.2
+Tested up to: 6.2
+Stable tag: 1.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,10 +48,10 @@ This process defines you the steps to follow either you are installing through W
 
 == Changelog ==
 
-= 1.0.0 =
+= 1.0.0 - July 28, 2023 =
 
-  * TBD
+	* Fix WPCS issues
 
 = Earlier versions =
 
-  * For the changelog of earlier versions, please refer to the separate changelog.txt file.
+	* For the changelog of earlier versions, please refer to the separate changelog.txt file.

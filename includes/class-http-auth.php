@@ -18,7 +18,7 @@ final class HTTP_Auth {
 	 *
 	 * @var string
 	 */
-	public $version = '0.3.2';
+	public $version = '1.0.0';
 
 	/**
 	 * Class constructor.
