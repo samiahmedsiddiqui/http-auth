@@ -25,8 +25,8 @@
     "source": "https://github.com/samiahmedsiddiqui/http-auth"
   },
   "require": {
-    "php": ">5.4",
-    "composer/installers": "1.7.0"
+    "php": "^5.4 || ^7.0",
+    "composer/installers": "^1.7.0"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
@@ -43,5 +43,11 @@
     "phpcs-errors-summary": "@check-cs-summary -n",
     "phpcbf": "phpcbf"
   },
-  "prefer-stable" : true
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
 }

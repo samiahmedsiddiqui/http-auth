@@ -1,9 +1,6 @@
 # Composer
 /vendor/
 
-# Composer Lock
-composer.lock
-
 # Editors
 project.xml
 project.properties
@@ -17,11 +14,11 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
-# Gulp
+# Node.js Packages
 /node_modules/
 
-# Package Lock
-package-lock.json
+# Yarn
+yarn.lock
 
 # OS X metadata
 .DS_Store
