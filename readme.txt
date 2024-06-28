@@ -2,7 +2,7 @@
 Contributors: aliya-yasir, sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
 Requires at least: 3.5
-Tested up to: 6.2
+Tested up to: 6.5
 Stable tag: 1.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
