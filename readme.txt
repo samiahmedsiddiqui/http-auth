@@ -1,9 +1,9 @@
 === HTTP Auth ===
-Contributors: aliya-yasir, sasiddiqui
-Tags: http-auth, brute attack, brute-force, restrict site, restrict pages, authentication, http authentication, login, admin, crawler, crawl, locked
+Contributors: sasiddiqui
+Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
 Requires at least: 3.5
-Tested up to: 6.5
-Stable tag: 1.0.0
+Tested up to: 6.7
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,6 +53,10 @@ This process defines you the steps to follow either you are installing through W
 2. You're done!
 
 == Changelog ==
+
+= 1.0.1 - Dec 23, 24 =
+
+Fix minor WPCS issues and change text for better understanding.
 
 = 1.0.0 - July 28, 2023 =
 

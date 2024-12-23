@@ -3,10 +3,13 @@
  * Plugin Name: HTTP Auth
  * Plugin URI: https://www.yasglobal.com/web-design-development/wordpress/http-auth/
  * Description: Secure your website from the Brute-force attack.
- * Version: 1.0.0
+ * Version: 1.0.1
+ * Requires at least: 3.5
+ * Requires PHP: 5.6
  * Author: Sami Ahmed Siddiqui
  * Author URI: https://www.linkedin.com/in/sami-ahmed-siddiqui/
  * License: GPLv3
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * Text Domain: http-auth
  * Domain Path: /languages/
@@ -16,7 +19,7 @@
 
 /**
  *  HTTP Auth - Secure your website from the Brute-force attack
- *  Copyright 2016-2023 Sami Ahmed Siddiqui <sami.siddiqui@yasglobal.com>
+ *  Copyright 2016-2024 Sami Ahmed Siddiqui <sami.siddiqui@yasglobal.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
