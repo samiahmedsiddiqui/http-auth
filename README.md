@@ -1,26 +1,23 @@
 # HTTP Auth
 
-Enabling this plugin allows you to set up HTTP Authentication on your site.
-You can easily set username and password for HTTP Authentication.
+This plugin empowers you to set up HTTP Authentication for your website. This adds an extra layer of security by requiring a username and password to access specific areas.
 
-This plugin helps:
+Here's how it benefits you:
 
-* Restricting crawlers to crawl on your site while development.
-* Restrict admin pages after being your site Live.
-* Easy to activate or deactivate Http Auth without deactivating plugin.
+- **Enhanced Admin Security:** Shield your admin pages from brute-force attacks by adding a login barrier.
+- **Controlled Crawling:** Restrict crawlers from accessing your site during development, preventing unnecessary indexing.
+- **Post-Launch Access Control:** Maintain control over admin page access even after your website goes live.
+- **Easy Activation/Deactivation:** Conveniently enable or disable HTTP Auth without deactivating the plugin entirely.
 
-## Thanks for the Support
+## Help Us Improve!
 
-To support future development and to help make it even better please leave a
-[5-star](https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post)
-rating with a nice message to me :)
+I am constantly working to enhance this plugin and your feedback is valuable. If you are happy with the plugin, consider leaving a review on WordPress.org. Your positive feedback motivates us to keep improving!
 
-## Bug reports
+Link to Reviews: [https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post]()
 
-Bug reports for HTTP Auth are
-[welcomed on GitHub](https://github.com/yasglobal/http-auth). Please note
-GitHub is no a support forum, and issues that aren't properly qualified as bugs
-will be closed.
+## Bug Reports
+
+We welcome bug reports for HTTP Auth on GitHub: [https://github.com/samiahmedsiddiqui/http-auth/issues](). Please remember that GitHub is primarily for bug reporting, and issues not classified as genuine bugs may be closed.
 
 ## Installation
 

@@ -34,7 +34,7 @@ class HTTP_Auth_Admin {
 		add_menu_page(
 			'HTTP Auth',
 			'HTTP Auth',
-			'administrator',
+			'activate_plugins',
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
@@ -42,7 +42,7 @@ class HTTP_Auth_Admin {
 			'http-auth-settings',
 			'HTTP Auth Settings',
 			'Settings',
-			'administrator',
+			'activate_plugins',
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
@@ -50,7 +50,7 @@ class HTTP_Auth_Admin {
 			'http-auth-settings',
 			'About HTTP Auth',
 			'About',
-			'administrator',
+			'activate_plugins',
 			'http-auth-about-plugins',
 			array( $this, 'about_plugin' )
 		);

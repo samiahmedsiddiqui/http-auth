@@ -45,7 +45,7 @@ class HTTP_Auth_Settings {
 						$http_rule .= PHP_EOL . '# END HTTP Auth';
 						$http_rule .= PHP_EOL;
 
-						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 						file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
 					}
 				}
@@ -66,29 +66,23 @@ class HTTP_Auth_Settings {
 		?>
 		<table class="http-auth-table">
 			<caption>
-			<?php
-				esc_html_e( 'Credentials', 'http-auth' );
-			?>
+				<?php esc_html_e( 'Credentials', 'http-auth' ); ?>
 			</caption>
 			<tbody>
 			<tr>
 				<th>
-				<?php
-				esc_html_e( 'Username :', 'http-auth' );
-				?>
+					<?php esc_html_e( 'Username :', 'http-auth' ); ?>
 				</th>
 				<td>
-				<input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
+					<input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
 				</td>
 			</tr>
 			<tr>
 				<th>
-				<?php
-				esc_html_e( 'Password :', 'http-auth' );
-				?>
+					<?php esc_html_e( 'Password :', 'http-auth' ); ?>
 				</th>
 				<td>
-				<input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
+					<input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
 				</td>
 			</tr>
 			</tbody>
@@ -108,16 +102,12 @@ class HTTP_Auth_Settings {
 		?>
 		<table class="http-auth-table">
 			<caption>
-			<?php
-				esc_html_e( 'Message (Optional)', 'http-auth' );
-			?>
+				<?php esc_html_e( 'Message (Optional)', 'http-auth' ); ?>
 			</caption>
 			<tbody>
 				<tr>
 					<th>
-					<?php
-						esc_html_e( 'Cancel Message :', 'http-auth' );
-					?>
+						<?php esc_html_e( 'Cancel Message :', 'http-auth' ); ?>
 					</th>
 					<td>
 						<textarea name="http_auth_message" rows="5" cols="45">
