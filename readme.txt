@@ -2,7 +2,7 @@
 Contributors: sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
 Requires at least: 3.5
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -28,7 +28,7 @@ Link to Reviews: [https://wordpress.org/support/plugin/http-auth/reviews/?rate=5
 
 === Bug Reports ===
 
-We welcome bug reports for HTTP Auth on GitHub: [https://github.com/samiahmedsiddiqui/http-auth](). Please remember that GitHub is primarily for bug reporting, and issues not classified as genuine bugs may be closed.
+We welcome bug reports for HTTP Auth on GitHub: [https://github.com/samiahmedsiddiqui/http-auth](https://github.com/samiahmedsiddiqui/http-auth). Please remember that GitHub is primarily for bug reporting, and issues not classified as genuine bugs may be closed.
 
 == Installation ==
 
