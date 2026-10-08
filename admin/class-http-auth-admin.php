@@ -17,11 +17,49 @@ class HTTP_Auth_Admin {
 	 * Initializes WordPress hooks.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_filter(
-			'plugin_action_links_' . HTTP_AUTH_BASENAME,
-			array( $this, 'settings_link' )
-		);
+		if ( HTTP_Auth::is_network_mode() ) {
+			add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
+			add_filter(
+				'network_admin_plugin_action_links_' . HTTP_AUTH_BASENAME,
+				array( $this, 'settings_link' )
+			);
+		} else {
+			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+			add_filter(
+				'plugin_action_links_' . HTTP_AUTH_BASENAME,
+				array( $this, 'settings_link' )
+			);
+		}
+	}
+
+	/**
+	 * Capability required to manage the settings.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @return string
+	 */
+	public static function get_capability() {
+		return HTTP_Auth::is_network_mode() ? 'manage_network_options' : 'activate_plugins';
+	}
+
+	/**
+	 * URL of a plugin admin page in the network or site admin.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param string $page Page slug.
+	 * @param array  $args Extra query args.
+	 *
+	 * @return string
+	 */
+	public static function get_page_url( $page, $args = array() ) {
+		$path = 'admin.php?page=' . $page;
+		$url  = HTTP_Auth::is_network_mode() ? network_admin_url( $path ) : admin_url( $path );
+
+		return add_query_arg( $args, $url );
 	}
 
 	/**
@@ -34,7 +72,7 @@ class HTTP_Auth_Admin {
 		add_menu_page(
 			__( 'HTTP Auth', 'http-auth' ),
 			__( 'HTTP Auth', 'http-auth' ),
-			'activate_plugins',
+			self::get_capability(),
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
@@ -42,7 +80,7 @@ class HTTP_Auth_Admin {
 			'http-auth-settings',
 			__( 'HTTP Auth Settings', 'http-auth' ),
 			__( 'Settings', 'http-auth' ),
-			'activate_plugins',
+			self::get_capability(),
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
@@ -50,7 +88,7 @@ class HTTP_Auth_Admin {
 			'http-auth-settings',
 			__( 'About HTTP Auth', 'http-auth' ),
 			__( 'About', 'http-auth' ),
-			'activate_plugins',
+			self::get_capability(),
 			'http-auth-about-plugins',
 			array( $this, 'about_plugin' )
 		);
@@ -178,7 +216,7 @@ class HTTP_Auth_Admin {
 	public function settings_link( $links ) {
 		$about = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( admin_url( 'admin.php?page=http-auth-about-plugins' ) ),
+			esc_url( self::get_page_url( 'http-auth-about-plugins' ) ),
 			esc_html__( 'About', 'http-auth' )
 		);
 
@@ -190,7 +228,7 @@ class HTTP_Auth_Admin {
 
 		$settings = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( admin_url( 'admin.php?page=http-auth-settings' ) ),
+			esc_url( self::get_page_url( 'http-auth-settings' ) ),
 			esc_html__( 'Settings', 'http-auth' )
 		);
 

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Settings page, where credentials, message and activation can be set.
+ * Settings page with a tab for admin and a tab for complete site protection.
  */
 class HTTP_Auth_Settings {
 
@@ -27,6 +27,135 @@ class HTTP_Auth_Settings {
 	 * @var string
 	 */
 	const NONCE_NAME = '_http_auth_settings_nonce';
+
+	/**
+	 * Get the tab labels in display order.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return array
+	 */
+	private function get_tabs() {
+		return array(
+			'admin' => __( 'Admin Site', 'http-auth' ),
+			'site'  => __( 'Complete Site', 'http-auth' ),
+		);
+	}
+
+	/**
+	 * Get the current tab from the request.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return string
+	 */
+	private function get_current_tab() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		$tab = 'admin';
+		if ( isset( $_POST['http_auth_tab'] ) ) {
+			$tab = sanitize_key( wp_unslash( $_POST['http_auth_tab'] ) );
+		} elseif ( isset( $_GET['tab'] ) ) {
+			$tab = sanitize_key( wp_unslash( $_GET['tab'] ) );
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		return in_array( $tab, HTTP_Auth::TABS, true ) ? $tab : 'admin';
+	}
+
+	/**
+	 * Generate the tab navigation HTML.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $current Current tab.
+	 * @param array  $settings Settings of all tabs.
+	 */
+	private function get_tabs_output( $current, $settings ) {
+		?>
+		<nav class="nav-tab-wrapper">
+			<?php foreach ( $this->get_tabs() as $tab => $label ) : ?>
+				<a href="<?php echo esc_url( HTTP_Auth_Admin::get_page_url( 'http-auth-settings', array( 'tab' => $tab ) ) ); ?>" class="nav-tab<?php echo $current === $tab ? ' nav-tab-active' : ''; ?>">
+					<?php echo esc_html( $label ); ?>
+					<?php if ( HTTP_Auth::is_enabled( $settings[ $tab ] ) ) : ?>
+						<span class="http-auth-status"><?php esc_html_e( '(Active)', 'http-auth' ); ?></span>
+					<?php endif; ?>
+				</a>
+			<?php endforeach; ?>
+		</nav>
+		<?php
+	}
+
+	/**
+	 * Generate the tab description HTML.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $tab Current tab.
+	 */
+	private function get_description_output( $tab ) {
+		if ( 'admin' === $tab ) {
+			$description = __( 'Protect the login page, admin pages and XML-RPC of the listed sites. Recommended for production and multisite.', 'http-auth' );
+		} else {
+			$description = __( 'Protect every page of the listed sites. Recommended for development, staging and other environments.', 'http-auth' );
+		}
+		?>
+		<p class="description http-auth-description"><?php echo esc_html( $description ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Generate Site URLs section HTML.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array $urls Site URLs.
+	 */
+	private function get_urls_output( $urls ) {
+		?>
+		<table class="http-auth-table">
+			<caption>
+				<?php esc_html_e( 'Site URLs', 'http-auth' ); ?>
+			</caption>
+			<tbody>
+				<tr>
+					<th>
+						<label for="http-auth-urls"><?php esc_html_e( 'Apply on :', 'http-auth' ); ?></label>
+					</th>
+					<td>
+						<textarea id="http-auth-urls" name="http_auth_urls" rows="5" cols="45" placeholder="<?php echo esc_attr( HTTP_Auth::normalize_url( home_url() ) ); ?>"><?php echo esc_textarea( implode( "\n", $urls ) ); ?></textarea>
+						<p class="description">
+							<?php esc_html_e( 'One URL per line, without http(s)://. Use * as a wildcard, e.g. *.example.com', 'http-auth' ); ?>
+						</p>
+						<p class="description">
+							<?php
+							if ( HTTP_Auth::is_network_mode() ) {
+								esc_html_e( 'Network sites:', 'http-auth' );
+								foreach ( get_sites( array( 'number' => 50 ) ) as $site ) {
+									echo ' <code>' . esc_html( HTTP_Auth::normalize_url( $site->domain . $site->path ) ) . '</code>';
+								}
+							} else {
+								printf(
+									// translators: %s is replaced with the current site URL.
+									esc_html__( 'Current site: %s', 'http-auth' ),
+									'<code>' . esc_html( HTTP_Auth::normalize_url( home_url() ) ) . '</code>'
+								);
+							}
+							?>
+						</p>
+						<p class="description">
+							<?php esc_html_e( 'If a site is listed in both tabs, Complete Site is applied.', 'http-auth' ); ?>
+						</p>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+	}
 
 	/**
 	 * Generate Credentials section HTML.
@@ -98,66 +227,57 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Generate for section HTML.
-	 *
-	 * @access private
-	 * @since  1.0.0
-	 *
-	 * @param string $apply Where HTTP Auth is applied (`site` or `admin`).
-	 */
-	private function get_for_output( $apply ) {
-		?>
-		<table class="http-auth-table http-for">
-			<caption>
-				<?php esc_html_e( 'For', 'http-auth' ); ?>
-			</caption>
-			<tbody>
-				<tr>
-					<td>
-						<label>
-							<input type="radio" name="http_auth_apply" value="site" <?php checked( 'site', $apply ); ?> />
-							<strong>
-								<?php esc_html_e( 'Complete Site', 'http-auth' ); ?>
-							</strong>
-						</label>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label>
-							<input type="radio" name="http_auth_apply" value="admin" <?php checked( 'admin', $apply ); ?> />
-							<strong>
-								<?php esc_html_e( 'Login, Admin Pages and XML-RPC', 'http-auth' ); ?>
-							</strong>
-						</label>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<?php
-	}
-
-	/**
-	 * Redirect back to the settings page with a status code.
+	 * Redirect back to the settings tab with a status code.
 	 *
 	 * @access private
 	 * @since  1.1.0
 	 *
+	 * @param string $tab    Tab to show.
 	 * @param string $status Status code shown as a notice.
 	 */
-	private function redirect( $status ) {
+	private function redirect( $tab, $status ) {
 		wp_safe_redirect(
-			add_query_arg(
-				'http-auth-status',
-				$status,
-				admin_url( 'admin.php?page=http-auth-settings' )
+			HTTP_Auth_Admin::get_page_url(
+				'http-auth-settings',
+				array(
+					'tab'              => $tab,
+					'http-auth-status' => $status,
+				)
 			)
 		);
 		exit;
 	}
 
 	/**
-	 * Save HTTP Auth Settings.
+	 * Parse the Site URLs textarea.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $value Textarea value.
+	 *
+	 * @return array|false Normalized URLs, false if any line is invalid.
+	 */
+	private function parse_urls( $value ) {
+		$urls = array();
+		foreach ( preg_split( '/\R/', $value ) as $line ) {
+			$url = HTTP_Auth::normalize_url( $line );
+			if ( '' === $url ) {
+				continue;
+			}
+
+			if ( ! preg_match( '#^[a-z0-9*][a-z0-9*.-]*(:\d+)?(/[a-z0-9*._~%/-]*)?$#', $url ) ) {
+				return false;
+			}
+
+			$urls[] = $url;
+		}
+
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Save the settings of the submitted tab.
 	 *
 	 * @access public
 	 * @since  1.0.0
@@ -172,14 +292,17 @@ class HTTP_Auth_Settings {
 			self::NONCE_NAME
 		);
 
-		if ( ! current_user_can( 'activate_plugins' ) ) {
+		if ( ! current_user_can( HTTP_Auth_Admin::get_capability() ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to manage these settings.', 'http-auth' ) );
 		}
 
-		$current  = HTTP_Auth::get_settings();
+		$tab      = $this->get_current_tab();
+		$settings = HTTP_Auth::get_settings();
+		$current  = $settings[ $tab ];
 		$username = '';
 		$password = '';
 		$message  = '';
+		$urls     = '';
 
 		// Credentials are stored as typed, the password gets hashed.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -196,18 +319,8 @@ class HTTP_Auth_Settings {
 			$message = sanitize_textarea_field( wp_unslash( $_POST['http_auth_message'] ) );
 		}
 
-		if ( '' === $username || ( '' === $password && '' === $current['password'] ) ) {
-			$this->redirect( 'missing-credentials' );
-		}
-
-		// Basic auth sends `username:password` so the username can't have a colon.
-		if ( false !== strpos( $username, ':' ) ) {
-			$this->redirect( 'invalid-username' );
-		}
-
-		$apply = 'site';
-		if ( isset( $_POST['http_auth_apply'] ) && 'admin' === $_POST['http_auth_apply'] ) {
-			$apply = 'admin';
+		if ( isset( $_POST['http_auth_urls'] ) ) {
+			$urls = sanitize_textarea_field( wp_unslash( $_POST['http_auth_urls'] ) );
 		}
 
 		$activate = 'off';
@@ -215,21 +328,39 @@ class HTTP_Auth_Settings {
 			$activate = 'on';
 		}
 
-		$settings = array(
+		if ( '' === $username || ( '' === $password && '' === $current['password'] ) ) {
+			$this->redirect( $tab, 'missing-credentials' );
+		}
+
+		// Basic auth sends `username:password` so the username can't have a colon.
+		if ( false !== strpos( $username, ':' ) ) {
+			$this->redirect( $tab, 'invalid-username' );
+		}
+
+		$urls = $this->parse_urls( $urls );
+		if ( false === $urls ) {
+			$this->redirect( $tab, 'invalid-urls' );
+		}
+
+		if ( 'on' === $activate && empty( $urls ) ) {
+			$this->redirect( $tab, 'missing-urls' );
+		}
+
+		$settings[ $tab ] = array(
+			'activate' => $activate,
+			'urls'     => $urls,
 			'username' => $username,
 			'password' => '' === $password ? $current['password'] : wp_hash_password( $password ),
 			'message'  => $message,
-			'apply'    => $apply,
-			'activate' => $activate,
 		);
 
-		update_option( 'http_auth_settings', $settings );
+		HTTP_Auth::update_storage_option( 'http_auth_settings', $settings );
 
 		if ( 'on' === $activate ) {
 			HTTP_Auth_Htaccess::add_rules();
 		}
 
-		$this->redirect( 'saved' );
+		$this->redirect( $tab, 'saved' );
 	}
 
 	/**
@@ -248,6 +379,8 @@ class HTTP_Auth_Settings {
 			'saved'               => array( 'success', __( 'Settings saved.', 'http-auth' ) ),
 			'missing-credentials' => array( 'error', __( 'Username and password are required.', 'http-auth' ) ),
 			'invalid-username'    => array( 'error', __( 'Username can not contain a colon (:).', 'http-auth' ) ),
+			'invalid-urls'        => array( 'error', __( 'One or more site URLs are invalid.', 'http-auth' ) ),
+			'missing-urls'        => array( 'error', __( 'Add at least one site URL to activate.', 'http-auth' ) ),
 		);
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -270,7 +403,9 @@ class HTTP_Auth_Settings {
 	 * @since  0.1
 	 */
 	public function render() {
-		$settings = HTTP_Auth::get_settings();
+		$settings     = HTTP_Auth::get_settings();
+		$tab          = $this->get_current_tab();
+		$tab_settings = $settings[ $tab ];
 		?>
 		<div class="wrap">
 			<h1>
@@ -278,7 +413,11 @@ class HTTP_Auth_Settings {
 			esc_html_e( 'HTTP Auth SETTINGS', 'http-auth' );
 			?>
 			</h1>
-			<?php $this->get_notice_output(); ?>
+			<?php
+			$this->get_notice_output();
+			$this->get_tabs_output( $tab, $settings );
+			$this->get_description_output( $tab );
+			?>
 			<form method="POST" action="" id="http-auth">
 			<?php
 				wp_nonce_field(
@@ -286,13 +425,15 @@ class HTTP_Auth_Settings {
 					self::NONCE_NAME,
 					true
 				);
-
+			?>
+			<input type="hidden" name="http_auth_tab" value="<?php echo esc_attr( $tab ); ?>" />
+			<?php
+				$this->get_urls_output( $tab_settings['urls'] );
 				$this->get_credentials_output(
-					$settings['username'],
-					'' !== $settings['password']
+					$tab_settings['username'],
+					'' !== $tab_settings['password']
 				);
-				$this->get_message_output( $settings['message'] );
-				$this->get_for_output( $settings['apply'] );
+				$this->get_message_output( $tab_settings['message'] );
 			?>
 
 			<table class="http-auth-table">
@@ -300,7 +441,7 @@ class HTTP_Auth_Settings {
 					<tr>
 						<td>
 							<label>
-								<input type="checkbox" name="http_auth_activate" value="on" <?php checked( 'on', $settings['activate'] ); ?> />
+								<input type="checkbox" name="http_auth_activate" value="on" <?php checked( 'on', $tab_settings['activate'] ); ?> />
 								<strong>
 									<?php
 									esc_html_e( 'Activate', 'http-auth' );

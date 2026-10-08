@@ -19,6 +19,8 @@ Here's how it benefits you:
 * **Controlled Crawling:** Restrict crawlers from accessing your site during development, preventing unnecessary indexing.
 * **Post-Launch Access Control:** Maintain control over admin page access even after your website goes live.
 * **Easy Activation/Deactivation:** Conveniently enable or disable HTTP Auth without deactivating the plugin entirely.
+* **Per Environment Rules:** Protect only the admin on production and the complete site on development or staging, each with its own credentials.
+* **Multisite Ready:** Manage the protection of every site in the network from the Network Admin.
 
 === Help Us Improve! ===
 
@@ -54,9 +56,22 @@ This process defines you the steps to follow either you are installing through W
 
 == Frequently Asked Questions ==
 
-= What does "Login, Admin Pages and XML-RPC" protect? =
+= What is the difference between the Admin Site and Complete Site tabs? =
 
-The login page, all admin pages and `xmlrpc.php`. `admin-ajax.php` and valid logout requests are not protected so the frontend keeps working.
+Each tab has its own site URLs, credentials, message and activation.
+
+* **Admin Site** protects the login page, all admin pages and `xmlrpc.php`. `admin-ajax.php` and valid logout requests are not protected so the frontend keeps working. Use it for production and multisite.
+* **Complete Site** protects every page. Use it for development, staging and other environments.
+
+If a site is listed in both tabs, Complete Site is applied.
+
+= How are the site URLs matched? =
+
+Enter one URL per line without `http(s)://`, e.g. `example.com` or `example.com/blog` for a subdirectory site. Use `*` as a wildcard, e.g. `*.example.com`. URLs are matched against the site URL configured in WordPress, so the same database can be copied between production and staging and each environment gets its own protection.
+
+= How does it work on multisite? =
+
+When network activated, the settings page is available in the Network Admin and the URL lists cover every site in the network.
 
 = I got locked out after too many failed attempts. =
 
