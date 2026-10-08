@@ -11,6 +11,8 @@
 	},
 	"author": "Sami Ahmed Siddiqui",
 	"scripts": {
+		"build": "npx gulp build",
+		"version": "node scripts/sync-version.js && npm run build && git add http-auth.php readme.txt assets/css",
 		"format:fix": "npm run lint:format:fix",
 		"format:css:fix": "npx stylelint **/*.css --fix",
 		"lint": "npm run lint:css",
