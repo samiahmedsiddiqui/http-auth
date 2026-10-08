@@ -15,6 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class HTTP_Auth_Frontend {
 
 	/**
+	 * Realm sent with the `WWW-Authenticate` header.
+	 *
+	 * @var string
+	 */
+	const REALM = 'Restricted Site';
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -22,49 +29,220 @@ class HTTP_Auth_Frontend {
 	}
 
 	/**
-	 * Authenticate request before allowing access. Incase of unauthenticated
-	 * requests, cancelled message shows up with 401 Unauthorized status.
+	 * Check whether the current request is a valid logout request.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return bool
+	 */
+	private function is_logout_request() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['action'], $_REQUEST['_wpnonce'] )
+			|| 'logout' !== $_GET['action']
+		) {
+			return false;
+		}
+
+		$nonce = sanitize_key( wp_unslash( $_REQUEST['_wpnonce'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		return false !== wp_verify_nonce( $nonce, 'log-out' );
+	}
+
+	/**
+	 * Check whether the current request is for the login page.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return bool
+	 */
+	private function is_login_request() {
+		if ( function_exists( 'is_login' ) && is_login() ) {
+			return true;
+		}
+
+		return isset( $GLOBALS['pagenow'] ) && 'wp-login.php' === $GLOBALS['pagenow'];
+	}
+
+	/**
+	 * Check whether the current request needs to be authenticated.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array $settings Plugin settings.
+	 *
+	 * @return bool
+	 */
+	private function is_protected_request( $settings ) {
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return false;
+		}
+
+		if ( 'admin' !== $settings['apply'] ) {
+			$protected = true;
+		} elseif ( wp_doing_ajax() ) {
+			$protected = false;
+		} elseif ( is_admin() ) {
+			$protected = true;
+		} elseif ( $this->is_login_request() ) {
+			$protected = ! $this->is_logout_request();
+		} else {
+			$protected = defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST;
+		}
+
+		/**
+		 * Filters whether the current request is protected by HTTP Auth.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param bool  $protected Whether the request requires authentication.
+		 * @param array $settings  Plugin settings.
+		 */
+		return (bool) apply_filters( 'http_auth_is_protected_request', $protected, $settings );
+	}
+
+	/**
+	 * Get credentials sent with the request (not sanitized, compared as-is).
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return array|null Array of username and password, null if not provided.
+	 */
+	private function get_credentials() {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+			$password = '';
+			if ( isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+				$password = wp_unslash( $_SERVER['PHP_AUTH_PW'] );
+			}
+
+			return array( wp_unslash( $_SERVER['PHP_AUTH_USER'] ), $password );
+		}
+
+		// PHP as CGI/FastCGI: read the header passed via .htaccess.
+		foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION' ) as $key ) {
+			if ( empty( $_SERVER[ $key ] ) ) {
+				continue;
+			}
+
+			$header = wp_unslash( $_SERVER[ $key ] );
+			if ( 0 !== stripos( $header, 'basic ' ) ) {
+				return null;
+			}
+
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+			$decoded = base64_decode( substr( $header, 6 ), true );
+			if ( false === $decoded || false === strpos( $decoded, ':' ) ) {
+				return null;
+			}
+
+			return explode( ':', $decoded, 2 );
+		}
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		return null;
+	}
+
+	/**
+	 * Get the transient key which tracks failed attempts for the client IP.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return string
+	 */
+	private function get_attempts_key() {
+		$ip = '';
+		if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		}
+
+		/**
+		 * Filters the client IP used for throttling (e.g. behind a proxy).
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param string $ip Client IP address.
+		 */
+		$ip = (string) apply_filters( 'http_auth_client_ip', $ip );
+
+		return 'http_auth_attempts_' . md5( $ip );
+	}
+
+	/**
+	 * Validate credentials against the stored settings.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array $credentials Username and password sent with the request.
+	 * @param array $settings    Plugin settings.
+	 *
+	 * @return bool
+	 */
+	private function is_valid( $credentials, $settings ) {
+		list( $username, $password ) = $credentials;
+
+		$valid_username = hash_equals( (string) $settings['username'], (string) $username );
+		// Trimmed like wp_hash_password() does.
+		$valid_password = wp_check_password( trim( (string) $password ), $settings['password'] );
+
+		return $valid_username && $valid_password;
+	}
+
+	/**
+	 * Send the 401 response asking the browser for credentials.
 	 *
 	 * @access private
 	 * @since  1.0.0
 	 *
-	 * @param array $auth_settings configured settings for the plugin.
+	 * @param array $settings Plugin settings.
 	 */
-	private function apply_auth( $auth_settings ) {
-		$asked_password = '';
-		$asked_username = '';
-
-		if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
-			$asked_username = sanitize_text_field(
-				wp_unslash( $_SERVER['PHP_AUTH_USER'] )
-			);
+	private function deny( $settings ) {
+		$message = $settings['message'];
+		if ( '' === trim( $message ) ) {
+			$message = __( 'This Site is Restricted. Please contact the administrator for access.', 'http-auth' );
 		}
 
-		if ( isset( $_SERVER['PHP_AUTH_PW'] ) ) {
-			$asked_password = sanitize_text_field(
-				wp_unslash( $_SERVER['PHP_AUTH_PW'] )
-			);
-		}
+		$title = sprintf(
+			// translators: %s is replaced with the site name.
+			__( '%s | Restricted Site', 'http-auth' ),
+			get_bloginfo( 'name' )
+		);
 
-		if ( ! ( $asked_username === $auth_settings['username']
-			&& $asked_password === $auth_settings['password'] )
-		) {
-			$message = $auth_settings['message'];
-			$title   = get_bloginfo( 'name' ) . ' | Restricted Site';
-			header( 'WWW-Authenticate: Basic realm="Restricted Site"' );
+		header( 'WWW-Authenticate: Basic realm="' . self::REALM . '", charset="UTF-8"' );
 
-			if ( empty( $message ) ) {
-				$message = 'This Site is Restricted. Please contact the administrator for access.';
-			}
+		wp_die(
+			nl2br( esc_html( $message ) ),
+			esc_html( $title ),
+			array(
+				'response' => 401,
+			)
+		);
+	}
 
-			wp_die(
-				esc_html( $message ),
-				esc_html( $title ),
-				array(
-					'response' => 401,
-				)
-			);
-		}
+	/**
+	 * Send the 429 response when the client exceeded the allowed attempts.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param int $lockout Lockout duration in seconds.
+	 */
+	private function deny_too_many_attempts( $lockout ) {
+		header( 'Retry-After: ' . (int) $lockout );
+
+		wp_die(
+			esc_html__( 'Too many failed login attempts. Please try again later.', 'http-auth' ),
+			esc_html__( 'Too Many Requests', 'http-auth' ),
+			array(
+				'response' => 429,
+			)
+		);
 	}
 
 	/**
@@ -74,64 +252,54 @@ class HTTP_Auth_Frontend {
 	 * @since  0.1
 	 */
 	public function add_restriction() {
-		$http_settings = get_option( 'http_auth_settings' );
-		if ( is_string( $http_settings ) ) {
-			$http_settings = maybe_unserialize( $http_settings );
+		$settings = HTTP_Auth::get_settings();
+		if ( ! HTTP_Auth::is_enabled( $settings )
+			|| ! $this->is_protected_request( $settings )
+		) {
+			return;
 		}
 
-		if ( isset( $_SERVER, $_SERVER['REQUEST_URI'] ) && is_array( $http_settings ) ) {
-			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		/**
+		 * Filters the failed attempts allowed per IP. 0 disables throttling.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param int $max_attempts Maximum failed attempts.
+		 */
+		$max_attempts = (int) apply_filters( 'http_auth_max_attempts', 10 );
 
-			if ( isset( $http_settings['activate'] ) && 'on' === $http_settings['activate'] ) {
-				if ( isset( $http_settings['apply'] ) && 'admin' === $http_settings['apply'] ) {
-					if ( false === strpos( $request_uri, '/wp-admin' )
-						&& false === strpos( $request_uri, '/wp-login' )
-					) {
-						return;
-					} elseif ( 0 === strpos( $request_uri, '/wp-login' ) ) {
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-						if ( isset( $_REQUEST, $_REQUEST['action'], $_REQUEST['_wpnonce'] )
-							&& 'logout' === $_REQUEST['action']
-						) {
-							return;
-						}
-					} elseif ( false !== strpos( $request_uri, '/wp-admin/admin-ajax.php' ) ) {
-						return;
-					}
-				}
+		/**
+		 * Filters the lockout duration in seconds.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param int $lockout Lockout duration in seconds.
+		 */
+		$lockout = (int) apply_filters( 'http_auth_lockout_duration', 15 * MINUTE_IN_SECONDS );
 
-				if ( isset(
-					$_SERVER['HTTP_AUTHORIZATION'],
-					$_SERVER['SERVER_SOFTWARE'],
-					$_SERVER['PHP_AUTH_USER'],
-					$_SERVER['PHP_AUTH_PW']
-				)
-				) {
-					$http_authorization = sanitize_text_field(
-						wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] )
-					);
-					$server_software    = sanitize_text_field(
-						wp_unslash( $_SERVER['SERVER_SOFTWARE'] )
-					);
-					$php_auth_user      = sanitize_text_field(
-						wp_unslash( $_SERVER['PHP_AUTH_USER'] )
-					);
-					$php_auth_password  = sanitize_text_field(
-						wp_unslash( $_SERVER['PHP_AUTH_PW'] )
-					);
-					if ( 'apache' === strtolower( $server_software ) ) {
-						list( $php_auth_user, $php_auth_password ) = explode(
-							':',
-              // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-							base64_decode(
-								substr( $http_authorization, 6 )
-							)
-						);
-					}
-				}
+		$attempts_key = $this->get_attempts_key();
+		$attempts     = (int) get_transient( $attempts_key );
+		if ( $max_attempts > 0 && $attempts >= $max_attempts ) {
+			$this->deny_too_many_attempts( $lockout );
+		}
 
-				$this->apply_auth( $http_settings );
+		$credentials = $this->get_credentials();
+		if ( null === $credentials ) {
+			$this->deny( $settings );
+		}
+
+		if ( $this->is_valid( $credentials, $settings ) ) {
+			if ( $attempts > 0 ) {
+				delete_transient( $attempts_key );
 			}
+
+			return;
 		}
+
+		if ( $max_attempts > 0 ) {
+			set_transient( $attempts_key, $attempts + 1, $lockout );
+		}
+
+		$this->deny( $settings );
 	}
 }
