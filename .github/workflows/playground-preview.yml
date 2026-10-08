@@ -1,0 +1,47 @@
+name: Playground Preview
+
+# pull_request_target so fork and Dependabot PRs get a token that can update
+# the PR. Safe here: no PR code is checked out or run in this workflow.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: WordPress/action-wp-playground-pr-preview@1b15093d61b5e98cdfeb31466f34ade495762cd7 # v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          blueprint: |
+            {
+              "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+              "landingPage": "/wp-admin/admin.php?page=http-auth-settings",
+              "preferredVersions": {
+                "php": "8.3",
+                "wp": "latest"
+              },
+              "steps": [
+                {
+                  "step": "login"
+                },
+                {
+                  "step": "installPlugin",
+                  "pluginData": {
+                    "resource": "git:directory",
+                    "url": ${{ toJSON(github.event.pull_request.head.repo.clone_url) }},
+                    "ref": ${{ toJSON(github.event.pull_request.head.ref) }},
+                    "path": "/"
+                  },
+                  "options": {
+                    "activate": true,
+                    "targetFolderName": "http-auth"
+                  }
+                }
+              ]
+            }
