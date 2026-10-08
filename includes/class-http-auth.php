@@ -25,19 +25,26 @@ final class HTTP_Auth {
 	 *
 	 * @var int
 	 */
-	const DB_VERSION = 1;
+	const DB_VERSION = 2;
 
 	/**
-	 * Default plugin settings.
+	 * Settings tabs: `site` protects the complete site, `admin` the admin only.
 	 *
 	 * @var array
 	 */
-	private static $default_settings = array(
+	const TABS = array( 'site', 'admin' );
+
+	/**
+	 * Default settings of a tab.
+	 *
+	 * @var array
+	 */
+	private static $default_tab = array(
+		'activate' => 'off',
+		'urls'     => array(),
 		'username' => '',
 		'password' => '',
 		'message'  => '',
-		'apply'    => 'admin',
-		'activate' => 'off',
 	);
 
 	/**
@@ -105,7 +112,63 @@ final class HTTP_Auth {
 	}
 
 	/**
-	 * Get plugin settings merged with the defaults.
+	 * Whether the plugin is network activated on multisite.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @return bool
+	 */
+	public static function is_network_mode() {
+		if ( ! is_multisite() ) {
+			return false;
+		}
+
+		$plugins = get_site_option( 'active_sitewide_plugins', array() );
+
+		return isset( $plugins[ HTTP_AUTH_BASENAME ] );
+	}
+
+	/**
+	 * Get an option from the network (network mode) or the current site.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param string $name          Option name.
+	 * @param mixed  $default_value Default value.
+	 *
+	 * @return mixed
+	 */
+	public static function get_storage_option( $name, $default_value = false ) {
+		if ( self::is_network_mode() ) {
+			return get_site_option( $name, $default_value );
+		}
+
+		return get_option( $name, $default_value );
+	}
+
+	/**
+	 * Update an option on the network (network mode) or the current site.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param string $name  Option name.
+	 * @param mixed  $value Option value.
+	 *
+	 * @return bool
+	 */
+	public static function update_storage_option( $name, $value ) {
+		if ( self::is_network_mode() ) {
+			return update_site_option( $name, $value );
+		}
+
+		return update_option( $name, $value );
+	}
+
+	/**
+	 * Get settings of all tabs merged with the defaults.
 	 *
 	 * @access public
 	 * @since  1.1.0
@@ -113,62 +176,235 @@ final class HTTP_Auth {
 	 * @return array
 	 */
 	public static function get_settings() {
-		$settings = get_option( 'http_auth_settings', array() );
+		$settings = self::get_storage_option( 'http_auth_settings', array() );
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
 		}
 
-		return wp_parse_args( $settings, self::$default_settings );
+		$result = array();
+		foreach ( self::TABS as $tab ) {
+			$result[ $tab ] = self::default_tab();
+			if ( isset( $settings[ $tab ] ) && is_array( $settings[ $tab ] ) ) {
+				$result[ $tab ] = wp_parse_args( $settings[ $tab ], $result[ $tab ] );
+			}
+		}
+
+		return $result;
 	}
 
 	/**
-	 * Whether HTTP Auth is activated and has credentials to check against.
+	 * Get the default settings of a tab.
 	 *
 	 * @access public
 	 * @since  1.1.0
 	 *
-	 * @param array $settings Plugin settings.
-	 *
-	 * @return bool
+	 * @return array
 	 */
-	public static function is_enabled( $settings ) {
-		return 'on' === $settings['activate']
-			&& '' !== $settings['username']
-			&& '' !== $settings['password'];
+	public static function default_tab() {
+		return self::$default_tab;
 	}
 
 	/**
-	 * Decode HTML-escaped values and hash the plain text password.
+	 * Whether a tab is activated and has credentials and URLs.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param array $tab_settings Settings of a tab.
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled( $tab_settings ) {
+		return 'on' === $tab_settings['activate']
+			&& '' !== $tab_settings['username']
+			&& '' !== $tab_settings['password']
+			&& ! empty( $tab_settings['urls'] );
+	}
+
+	/**
+	 * Strip the scheme and trailing slash and lowercase a URL.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param string $url URL.
+	 *
+	 * @return string
+	 */
+	public static function normalize_url( $url ) {
+		$url = strtolower( trim( $url ) );
+		$url = preg_replace( '#^[a-z][a-z0-9+.-]*://#', '', $url );
+
+		return rtrim( $url, '/' );
+	}
+
+	/**
+	 * Whether the current site URL matches one of the URLs.
+	 *
+	 * Uses the configured site URL, not the spoofable Host header.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param array $urls Normalized URLs, `*` matches within a path segment.
+	 *
+	 * @return bool
+	 */
+	public static function matches_current_site( $urls ) {
+		$current = array_unique(
+			array(
+				self::normalize_url( home_url() ),
+				self::normalize_url( site_url() ),
+			)
+		);
+
+		foreach ( $urls as $url ) {
+			$pattern = '#^' . str_replace( '\*', '[^/]*', preg_quote( $url, '#' ) ) . '$#';
+			foreach ( $current as $site_url ) {
+				if ( preg_match( $pattern, $site_url ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the tab which applies to the current site, `site` wins over `admin`.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @return array|null Array with `mode` and the tab settings, null if none.
+	 */
+	public static function get_current_config() {
+		$settings = self::get_settings();
+		foreach ( self::TABS as $tab ) {
+			if ( self::is_enabled( $settings[ $tab ] )
+				&& self::matches_current_site( $settings[ $tab ]['urls'] )
+			) {
+				return array_merge( $settings[ $tab ], array( 'mode' => $tab ) );
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Migrate stored settings to the current schema.
 	 *
 	 * @access public
 	 * @since  1.1.0
 	 */
 	public static function maybe_upgrade() {
-		if ( (int) get_option( 'http_auth_db_version', 0 ) >= self::DB_VERSION ) {
+		$version = (int) self::get_storage_option( 'http_auth_db_version', 0 );
+		if ( $version >= self::DB_VERSION ) {
 			return;
 		}
 
-		$settings = get_option( 'http_auth_settings' );
+		$settings = self::get_storage_option( 'http_auth_settings' );
+		$home_url = home_url();
+
+		// Network activated: start from the main site settings.
+		if ( false === $settings && self::is_network_mode() ) {
+			$main_site = get_main_site_id();
+			$settings  = get_blog_option( $main_site, 'http_auth_settings' );
+			$version   = (int) get_blog_option( $main_site, 'http_auth_db_version', 0 );
+			$home_url  = get_home_url( $main_site );
+		}
+
 		if ( is_string( $settings ) ) {
 			// Old versions stored a serialized string.
 			$settings = maybe_unserialize( $settings );
 		}
 
 		if ( is_array( $settings ) ) {
-			$settings = wp_parse_args( $settings, self::$default_settings );
-
-			$settings['username'] = wp_specialchars_decode( $settings['username'], ENT_QUOTES );
-			$settings['message']  = wp_specialchars_decode( $settings['message'], ENT_QUOTES );
-			if ( '' !== $settings['password'] ) {
-				$settings['password'] = wp_hash_password(
-					wp_specialchars_decode( $settings['password'], ENT_QUOTES )
-				);
+			if ( $version < 1 ) {
+				$settings = self::upgrade_to_v1( $settings );
 			}
 
-			update_option( 'http_auth_settings', $settings );
+			if ( $version < 2 ) {
+				$settings = self::upgrade_to_v2( $settings, $home_url );
+			}
+
+			self::update_storage_option( 'http_auth_settings', $settings );
 		}
 
-		update_option( 'http_auth_db_version', self::DB_VERSION );
+		self::update_storage_option( 'http_auth_db_version', self::DB_VERSION );
+	}
+
+	/**
+	 * Decode HTML-escaped values and hash the plain text password.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array $settings Settings.
+	 *
+	 * @return array
+	 */
+	private static function upgrade_to_v1( $settings ) {
+		foreach ( array( 'username', 'password', 'message' ) as $key ) {
+			$settings[ $key ] = isset( $settings[ $key ] )
+				? wp_specialchars_decode( $settings[ $key ], ENT_QUOTES )
+				: '';
+		}
+
+		if ( '' !== $settings['password'] ) {
+			$settings['password'] = wp_hash_password( $settings['password'] );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Move the flat settings into the tab of the old `apply` value.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array  $settings Settings.
+	 * @param string $home_url URL of the site the settings belong to.
+	 *
+	 * @return array
+	 */
+	private static function upgrade_to_v2( $settings, $home_url ) {
+		$tab = isset( $settings['apply'] ) && 'site' === $settings['apply'] ? 'site' : 'admin';
+
+		$tab_settings = self::default_tab();
+		foreach ( array( 'activate', 'username', 'password', 'message' ) as $key ) {
+			if ( isset( $settings[ $key ] ) ) {
+				$tab_settings[ $key ] = $settings[ $key ];
+			}
+		}
+		$tab_settings['urls'] = array( self::normalize_url( $home_url ) );
+
+		$result         = array(
+			'site'  => self::default_tab(),
+			'admin' => self::default_tab(),
+		);
+		$result[ $tab ] = $tab_settings;
+
+		return $result;
+	}
+
+	/**
+	 * Whether any tab is activated.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @return bool
+	 */
+	public static function has_enabled_tab() {
+		foreach ( self::get_settings() as $tab_settings ) {
+			if ( self::is_enabled( $tab_settings ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -178,7 +414,7 @@ final class HTTP_Auth {
 	 * @since  1.1.0
 	 */
 	public static function activate() {
-		if ( self::is_enabled( self::get_settings() ) ) {
+		if ( self::has_enabled_tab() ) {
 			HTTP_Auth_Htaccess::add_rules();
 		}
 	}

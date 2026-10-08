@@ -72,16 +72,16 @@ class HTTP_Auth_Frontend {
 	 * @access private
 	 * @since  1.1.0
 	 *
-	 * @param array $settings Plugin settings.
+	 * @param array $config Settings of the tab applied to this site.
 	 *
 	 * @return bool
 	 */
-	private function is_protected_request( $settings ) {
+	private function is_protected_request( $config ) {
 		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return false;
 		}
 
-		if ( 'admin' !== $settings['apply'] ) {
+		if ( 'admin' !== $config['mode'] ) {
 			$protected = true;
 		} elseif ( wp_doing_ajax() ) {
 			$protected = false;
@@ -99,9 +99,9 @@ class HTTP_Auth_Frontend {
 		 * @since 1.1.0
 		 *
 		 * @param bool  $protected Whether the request requires authentication.
-		 * @param array $settings  Plugin settings.
+		 * @param array $config    Settings of the tab applied to this site.
 		 */
-		return (bool) apply_filters( 'http_auth_is_protected_request', $protected, $settings );
+		return (bool) apply_filters( 'http_auth_is_protected_request', $protected, $config );
 	}
 
 	/**
@@ -174,22 +174,66 @@ class HTTP_Auth_Frontend {
 	}
 
 	/**
+	 * Get failed attempts, shared across the network in network mode.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $key Transient key.
+	 *
+	 * @return int
+	 */
+	private function get_attempts( $key ) {
+		if ( HTTP_Auth::is_network_mode() ) {
+			return (int) get_site_transient( $key );
+		}
+
+		return (int) get_transient( $key );
+	}
+
+	/**
+	 * Store failed attempts, 0 deletes them.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $key      Transient key.
+	 * @param int    $attempts Failed attempts.
+	 * @param int    $lockout  Lockout duration in seconds.
+	 */
+	private function set_attempts( $key, $attempts, $lockout ) {
+		$network = HTTP_Auth::is_network_mode();
+
+		if ( 0 === $attempts ) {
+			if ( $network ) {
+				delete_site_transient( $key );
+			} else {
+				delete_transient( $key );
+			}
+		} elseif ( $network ) {
+			set_site_transient( $key, $attempts, $lockout );
+		} else {
+			set_transient( $key, $attempts, $lockout );
+		}
+	}
+
+	/**
 	 * Validate credentials against the stored settings.
 	 *
 	 * @access private
 	 * @since  1.1.0
 	 *
 	 * @param array $credentials Username and password sent with the request.
-	 * @param array $settings    Plugin settings.
+	 * @param array $config      Settings of the tab applied to this site.
 	 *
 	 * @return bool
 	 */
-	private function is_valid( $credentials, $settings ) {
+	private function is_valid( $credentials, $config ) {
 		list( $username, $password ) = $credentials;
 
-		$valid_username = hash_equals( (string) $settings['username'], (string) $username );
+		$valid_username = hash_equals( (string) $config['username'], (string) $username );
 		// Trimmed like wp_hash_password() does.
-		$valid_password = wp_check_password( trim( (string) $password ), $settings['password'] );
+		$valid_password = wp_check_password( trim( (string) $password ), $config['password'] );
 
 		return $valid_username && $valid_password;
 	}
@@ -200,10 +244,10 @@ class HTTP_Auth_Frontend {
 	 * @access private
 	 * @since  1.0.0
 	 *
-	 * @param array $settings Plugin settings.
+	 * @param array $config Settings of the tab applied to this site.
 	 */
-	private function deny( $settings ) {
-		$message = $settings['message'];
+	private function deny( $config ) {
+		$message = $config['message'];
 		if ( '' === trim( $message ) ) {
 			$message = __( 'This Site is Restricted. Please contact the administrator for access.', 'http-auth' );
 		}
@@ -252,10 +296,8 @@ class HTTP_Auth_Frontend {
 	 * @since  0.1
 	 */
 	public function add_restriction() {
-		$settings = HTTP_Auth::get_settings();
-		if ( ! HTTP_Auth::is_enabled( $settings )
-			|| ! $this->is_protected_request( $settings )
-		) {
+		$config = HTTP_Auth::get_current_config();
+		if ( null === $config || ! $this->is_protected_request( $config ) ) {
 			return;
 		}
 
@@ -278,28 +320,28 @@ class HTTP_Auth_Frontend {
 		$lockout = (int) apply_filters( 'http_auth_lockout_duration', 15 * MINUTE_IN_SECONDS );
 
 		$attempts_key = $this->get_attempts_key();
-		$attempts     = (int) get_transient( $attempts_key );
+		$attempts     = (int) $this->get_attempts( $attempts_key );
 		if ( $max_attempts > 0 && $attempts >= $max_attempts ) {
 			$this->deny_too_many_attempts( $lockout );
 		}
 
 		$credentials = $this->get_credentials();
 		if ( null === $credentials ) {
-			$this->deny( $settings );
+			$this->deny( $config );
 		}
 
-		if ( $this->is_valid( $credentials, $settings ) ) {
+		if ( $this->is_valid( $credentials, $config ) ) {
 			if ( $attempts > 0 ) {
-				delete_transient( $attempts_key );
+				$this->set_attempts( $attempts_key, 0, $lockout );
 			}
 
 			return;
 		}
 
 		if ( $max_attempts > 0 ) {
-			set_transient( $attempts_key, $attempts + 1, $lockout );
+			$this->set_attempts( $attempts_key, $attempts + 1, $lockout );
 		}
 
-		$this->deny( $settings );
+		$this->deny( $config );
 	}
 }
