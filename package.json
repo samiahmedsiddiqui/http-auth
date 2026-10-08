@@ -1,7 +1,7 @@
 {
 	"name": "http-auth",
 	"description": "Development files for the HTTP Auth plugin.",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/samiahmedsiddiqui/http-auth.git"
@@ -11,6 +11,8 @@
 	},
 	"author": "Sami Ahmed Siddiqui",
 	"scripts": {
+		"build": "npx gulp build",
+		"version": "node scripts/sync-version.js && npm run build && git add http-auth.php readme.txt assets/css",
 		"format:fix": "npm run lint:format:fix",
 		"format:css:fix": "npx stylelint **/*.css --fix",
 		"lint": "npm run lint:css",
