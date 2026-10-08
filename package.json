@@ -1,7 +1,7 @@
 {
 	"name": "http-auth",
 	"description": "Development files for the HTTP Auth plugin.",
-	"version": "1.1.0",
+	"version": "1.0.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/samiahmedsiddiqui/http-auth.git"

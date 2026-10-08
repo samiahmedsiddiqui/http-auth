@@ -3,7 +3,7 @@
  * Plugin Name: HTTP Auth
  * Plugin URI: https://www.yasglobal.com/web-design-development/wordpress/http-auth/
  * Description: Secure your website from the Brute-force attack.
- * Version: 1.1.0
+ * Version: 1.0.1
  * Requires at least: 4.9
  * Requires PHP: 5.6
  * Author: Sami Ahmed Siddiqui
@@ -44,7 +44,7 @@ if ( ! defined( 'HTTP_AUTH_FILE' ) ) {
 }
 
 if ( ! defined( 'HTTP_AUTH_VERSION' ) ) {
-	define( 'HTTP_AUTH_VERSION', '1.1.0' );
+	define( 'HTTP_AUTH_VERSION', '1.0.1' );
 }
 
 // Include the main HTTP Auth class.

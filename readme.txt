@@ -3,7 +3,7 @@ Contributors: sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
 Requires at least: 4.9
 Tested up to: 6.8
-Stable tag: 1.1.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -71,26 +71,6 @@ All visitors may share the proxy IP, so use the `http_auth_client_ip` filter to 
 Use the `http_auth_is_protected_request` filter and return `false` for the requests you want to allow.
 
 == Changelog ==
-
-= 1.1.0 - Oct 08, 2026 =
-
-* Security
-  * Store the password as a hash and never print it in the settings page.
-  * Compare credentials in constant time.
-  * Fix a bypass of the "Login and Admin Pages" mode via the query string.
-  * Protect `xmlrpc.php` in the "Login and Admin Pages" mode.
-  * Throttle failed attempts per IP.
-* Bug fixes
-  * Credentials with special characters (`&`, `<`, `"`, etc.) no longer fail.
-  * Fix CGI/FastCGI support (`Authorization` header fallback).
-  * Fix double-escaped and extra whitespace in the cancel message.
-  * Do not block WP-Cron and WP-CLI in the "Complete Site" mode.
-  * Support WordPress installed in a subdirectory.
-* Enhancements
-  * Use `insert_with_markers()` for .htaccess and remove the rules on deactivation.
-  * Show a notice after saving the settings.
-  * Remove settings from all sites on multisite uninstall.
-  * Translatable menu and frontend strings.
 
 = 1.0.1 - Dec 23, 24 =
 

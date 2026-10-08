@@ -21,6 +21,13 @@ final class HTTP_Auth {
 	public $version = HTTP_AUTH_VERSION;
 
 	/**
+	 * Settings schema version, bumped when stored settings need migrating.
+	 *
+	 * @var int
+	 */
+	const DB_VERSION = 1;
+
+	/**
 	 * Default plugin settings.
 	 *
 	 * @var array
@@ -131,14 +138,13 @@ final class HTTP_Auth {
 	}
 
 	/**
-	 * Decode HTML-escaped values and hash the plain text password (pre 1.1.0).
+	 * Decode HTML-escaped values and hash the plain text password.
 	 *
 	 * @access public
 	 * @since  1.1.0
 	 */
 	public static function maybe_upgrade() {
-		$db_version = get_option( 'http_auth_plugin_version', '0' );
-		if ( version_compare( $db_version, '1.1.0', '>=' ) ) {
+		if ( (int) get_option( 'http_auth_db_version', 0 ) >= self::DB_VERSION ) {
 			return;
 		}
 
@@ -162,7 +168,7 @@ final class HTTP_Auth {
 			update_option( 'http_auth_settings', $settings );
 		}
 
-		update_option( 'http_auth_plugin_version', HTTP_AUTH_VERSION );
+		update_option( 'http_auth_db_version', self::DB_VERSION );
 	}
 
 	/**

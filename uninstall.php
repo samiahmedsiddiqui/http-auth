@@ -18,6 +18,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 function http_auth_delete_options() {
 	delete_option( 'http_auth_settings' );
 	delete_option( 'http_auth_plugin_version' );
+	delete_option( 'http_auth_db_version' );
 }
 
 if ( is_multisite() ) {
