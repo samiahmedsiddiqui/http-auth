@@ -1,7 +1,7 @@
 === HTTP Auth ===
 Contributors: sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
-Requires at least: 3.5
+Requires at least: 4.9
 Tested up to: 6.8
 Stable tag: 1.0.1
 License: GPLv3
@@ -51,6 +51,24 @@ This process defines you the steps to follow either you are installing through W
 
 1. Go to the plugin settings page and set up the plugin for your site.
 2. You're done!
+
+== Frequently Asked Questions ==
+
+= What does "Login, Admin Pages and XML-RPC" protect? =
+
+The login page, all admin pages and `xmlrpc.php`. `admin-ajax.php` and valid logout requests are not protected so the frontend keeps working.
+
+= I got locked out after too many failed attempts. =
+
+After 10 failed attempts from the same IP, requests are blocked for 15 minutes. Both values can be changed with the `http_auth_max_attempts` and `http_auth_lockout_duration` filters. Return `0` from `http_auth_max_attempts` to disable throttling.
+
+= My site is behind a proxy or load balancer. =
+
+All visitors may share the proxy IP, so use the `http_auth_client_ip` filter to return the real client IP (for example from a trusted `X-Forwarded-For` header).
+
+= How can I skip HTTP Auth for some requests? =
+
+Use the `http_auth_is_protected_request` filter and return `false` for the requests you want to allow.
 
 == Changelog ==
 

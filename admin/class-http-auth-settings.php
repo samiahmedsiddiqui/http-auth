@@ -15,43 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class HTTP_Auth_Settings {
 
 	/**
-	 * Call page Settings Function.
+	 * Nonce action prefix.
+	 *
+	 * @var string
 	 */
-	public function __construct() {
-		$this->http_auth_configs();
-	}
+	const NONCE_ACTION = 'http-auth-settings_';
 
 	/**
-	 * Check server software if apache then add HTTP Auth config in .htaccess file.
+	 * Nonce field name.
 	 *
-	 * @access private
-	 * @since  1.0.0
+	 * @var string
 	 */
-	private function apache_config() {
-		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
-			$server_software = sanitize_text_field(
-				wp_unslash( $_SERVER['SERVER_SOFTWARE'] )
-			);
-			if ( 'apache' === strtolower( $server_software ) ) {
-				$filename    = ABSPATH . '.htaccess';
-				$get_content = file_get_contents( $filename, true );
-				if ( false !== $get_content ) {
-					if ( false === strpos( $get_content, '# BEGIN HTTP Auth' ) ) {
-						$http_rule  = PHP_EOL . '# BEGIN HTTP Auth';
-						$http_rule .= PHP_EOL . '<IfModule mod_rewrite.c>';
-						$http_rule .= PHP_EOL . 'RewriteEngine on';
-						$http_rule .= PHP_EOL . 'RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]';
-						$http_rule .= PHP_EOL . '</IfModule>';
-						$http_rule .= PHP_EOL . '# END HTTP Auth';
-						$http_rule .= PHP_EOL;
-
-						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-						file_put_contents( $filename, $http_rule, FILE_APPEND | LOCK_EX );
-					}
-				}
-			}
-		}
-	}
+	const NONCE_NAME = '_http_auth_settings_nonce';
 
 	/**
 	 * Generate Credentials section HTML.
@@ -59,10 +34,10 @@ class HTTP_Auth_Settings {
 	 * @access private
 	 * @since  1.0.0
 	 *
-	 * @param string $username HTTP Auth Username.
-	 * @param string $password HTTP Auth Password.
+	 * @param string $username     HTTP Auth Username.
+	 * @param bool   $has_password Whether a password is already saved.
 	 */
-	private function get_credentials_output( $username, $password ) {
+	private function get_credentials_output( $username, $has_password ) {
 		?>
 		<table class="http-auth-table">
 			<caption>
@@ -71,18 +46,22 @@ class HTTP_Auth_Settings {
 			<tbody>
 			<tr>
 				<th>
-					<?php esc_html_e( 'Username :', 'http-auth' ); ?>
+					<label for="http-auth-username"><?php esc_html_e( 'Username :', 'http-auth' ); ?></label>
 				</th>
 				<td>
-					<input type="text" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" required />
+					<input type="text" id="http-auth-username" name="http_auth_username" value="<?php echo esc_attr( $username ); ?>" class="regular-text" autocomplete="off" required />
 				</td>
 			</tr>
 			<tr>
 				<th>
-					<?php esc_html_e( 'Password :', 'http-auth' ); ?>
+					<label for="http-auth-password"><?php esc_html_e( 'Password :', 'http-auth' ); ?></label>
 				</th>
 				<td>
-					<input type="password" name="http_auth_password" value="<?php echo esc_attr( $password ); ?>" class="regular-text" required />
+					<?php if ( $has_password ) : ?>
+						<input type="password" id="http-auth-password" name="http_auth_password" value="" class="regular-text" autocomplete="new-password" placeholder="<?php esc_attr_e( 'Leave blank to keep the current password', 'http-auth' ); ?>" />
+					<?php else : ?>
+						<input type="password" id="http-auth-password" name="http_auth_password" value="" class="regular-text" autocomplete="new-password" required />
+					<?php endif; ?>
 				</td>
 			</tr>
 			</tbody>
@@ -107,12 +86,10 @@ class HTTP_Auth_Settings {
 			<tbody>
 				<tr>
 					<th>
-						<?php esc_html_e( 'Cancel Message :', 'http-auth' ); ?>
+						<label for="http-auth-message"><?php esc_html_e( 'Cancel Message :', 'http-auth' ); ?></label>
 					</th>
 					<td>
-						<textarea name="http_auth_message" rows="5" cols="45">
-							<?php echo esc_html( $message ); ?>
-						</textarea>
+						<textarea id="http-auth-message" name="http_auth_message" rows="5" cols="45"><?php echo esc_textarea( $message ); ?></textarea>
 					</td>
 				</tr>
 			</tbody>
@@ -126,10 +103,9 @@ class HTTP_Auth_Settings {
 	 * @access private
 	 * @since  1.0.0
 	 *
-	 * @param string $http_apply_site Applicable on site-wide.
-	 * @param string $http_apply_admin Applicable on Admin pages only.
+	 * @param string $apply Where HTTP Auth is applied (`site` or `admin`).
 	 */
-	private function get_for_output( $http_apply_site, $http_apply_admin ) {
+	private function get_for_output( $apply ) {
 		?>
 		<table class="http-auth-table http-for">
 			<caption>
@@ -138,18 +114,22 @@ class HTTP_Auth_Settings {
 			<tbody>
 				<tr>
 					<td>
-						<input type="radio" name="http_auth_apply" value="site" <?php echo esc_html( $http_apply_site ); ?> />
-						<strong>
-							<?php esc_html_e( 'Complete Site', 'http-auth' ); ?>
-						</strong>
+						<label>
+							<input type="radio" name="http_auth_apply" value="site" <?php checked( 'site', $apply ); ?> />
+							<strong>
+								<?php esc_html_e( 'Complete Site', 'http-auth' ); ?>
+							</strong>
+						</label>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<input type="radio" name="http_auth_apply" value="admin" <?php echo esc_html( $http_apply_admin ); ?> />
-						<strong>
-							<?php esc_html_e( 'Login and Admin Pages', 'http-auth' ); ?>
-						</strong>
+						<label>
+							<input type="radio" name="http_auth_apply" value="admin" <?php checked( 'admin', $apply ); ?> />
+							<strong>
+								<?php esc_html_e( 'Login, Admin Pages and XML-RPC', 'http-auth' ); ?>
+							</strong>
+						</label>
 					</td>
 				</tr>
 			</tbody>
@@ -158,99 +138,139 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Save HTTP Auth Settings.
+	 * Redirect back to the settings page with a status code.
 	 *
 	 * @access private
-	 * @since  1.0.0
+	 * @since  1.1.0
+	 *
+	 * @param string $status Status code shown as a notice.
 	 */
-	private function save_settings() {
-		$form_submit = filter_input( INPUT_POST, 'submit' );
-		$user_id     = get_current_user_id();
-
-		if ( $form_submit
-			&& check_admin_referer(
-				'http-auth-settings_' . $user_id,
-				'_http_auth_settings_nonce'
+	private function redirect( $status ) {
+		wp_safe_redirect(
+			add_query_arg(
+				'http-auth-status',
+				$status,
+				admin_url( 'admin.php?page=http-auth-settings' )
 			)
-		) {
-			$http_settings = array(
-				'username' => '',
-				'password' => '',
-				'message'  => '',
-				'apply'    => 'site',
-				'activate' => 'off',
-			);
-
-			$activate_auth = filter_input( INPUT_POST, 'http_auth_activate' );
-			$set_apply     = filter_input( INPUT_POST, 'http_auth_apply' );
-			$set_message   = filter_input( INPUT_POST, 'http_auth_message' );
-			$set_password  = filter_input( INPUT_POST, 'http_auth_password' );
-			$set_username  = filter_input( INPUT_POST, 'http_auth_username' );
-
-			if ( $activate_auth ) {
-				$http_settings['activate'] = $activate_auth;
-			}
-
-			if ( $set_apply && 'admin' === $set_apply ) {
-				$http_settings['apply'] = $set_apply;
-			}
-
-			if ( $set_message ) {
-				$http_settings['message'] = esc_html( trim( $set_message ) );
-			}
-
-			if ( $set_password ) {
-				$http_settings['password'] = esc_attr( $set_password );
-			}
-
-			if ( $set_username ) {
-				$http_settings['username'] = esc_attr( $set_username );
-			}
-
-			update_option( 'http_auth_settings', $http_settings );
-
-			$this->apache_config();
-		}
+		);
+		exit;
 	}
 
 	/**
-	 * HTTP Auth Settings.
+	 * Save HTTP Auth Settings.
+	 *
+	 * @access public
+	 * @since  1.0.0
+	 */
+	public function maybe_save() {
+		if ( ! isset( $_POST[ self::NONCE_NAME ] ) ) {
+			return;
+		}
+
+		check_admin_referer(
+			self::NONCE_ACTION . get_current_user_id(),
+			self::NONCE_NAME
+		);
+
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to manage these settings.', 'http-auth' ) );
+		}
+
+		$current  = HTTP_Auth::get_settings();
+		$username = '';
+		$password = '';
+		$message  = '';
+
+		// Credentials are stored as typed, the password gets hashed.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_POST['http_auth_username'] ) ) {
+			$username = trim( wp_unslash( $_POST['http_auth_username'] ) );
+		}
+
+		if ( isset( $_POST['http_auth_password'] ) ) {
+			$password = trim( wp_unslash( $_POST['http_auth_password'] ) );
+		}
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( isset( $_POST['http_auth_message'] ) ) {
+			$message = sanitize_textarea_field( wp_unslash( $_POST['http_auth_message'] ) );
+		}
+
+		if ( '' === $username || ( '' === $password && '' === $current['password'] ) ) {
+			$this->redirect( 'missing-credentials' );
+		}
+
+		// Basic auth sends `username:password` so the username can't have a colon.
+		if ( false !== strpos( $username, ':' ) ) {
+			$this->redirect( 'invalid-username' );
+		}
+
+		$apply = 'site';
+		if ( isset( $_POST['http_auth_apply'] ) && 'admin' === $_POST['http_auth_apply'] ) {
+			$apply = 'admin';
+		}
+
+		$activate = 'off';
+		if ( isset( $_POST['http_auth_activate'] ) && 'on' === $_POST['http_auth_activate'] ) {
+			$activate = 'on';
+		}
+
+		$settings = array(
+			'username' => $username,
+			'password' => '' === $password ? $current['password'] : wp_hash_password( $password ),
+			'message'  => $message,
+			'apply'    => $apply,
+			'activate' => $activate,
+		);
+
+		update_option( 'http_auth_settings', $settings );
+
+		if ( 'on' === $activate ) {
+			HTTP_Auth_Htaccess::add_rules();
+		}
+
+		$this->redirect( 'saved' );
+	}
+
+	/**
+	 * Show the notice for the last save, if any.
 	 *
 	 * @access private
+	 * @since  1.1.0
+	 */
+	private function get_notice_output() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['http-auth-status'] ) ) {
+			return;
+		}
+
+		$notices = array(
+			'saved'               => array( 'success', __( 'Settings saved.', 'http-auth' ) ),
+			'missing-credentials' => array( 'error', __( 'Username and password are required.', 'http-auth' ) ),
+			'invalid-username'    => array( 'error', __( 'Username can not contain a colon (:).', 'http-auth' ) ),
+		);
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$status = sanitize_key( wp_unslash( $_GET['http-auth-status'] ) );
+		if ( ! isset( $notices[ $status ] ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+			esc_attr( $notices[ $status ][0] ),
+			esc_html( $notices[ $status ][1] )
+		);
+	}
+
+	/**
+	 * HTTP Auth Settings page HTML.
+	 *
+	 * @access public
 	 * @since  0.1
 	 */
-	private function http_auth_configs() {
-		$this->save_settings();
-
-		$get_settings     = get_option( 'http_auth_settings' );
-		$http_activated   = '';
-		$http_apply_admin = 'checked';
-		$http_apply_site  = '';
-		$message          = '';
-		$password         = '';
-		$user_id          = get_current_user_id();
-		$username         = '';
-
-		if ( is_string( $get_settings ) ) {
-			$get_settings = maybe_unserialize( $get_settings );
-		}
-
-		if ( isset( $get_settings ) && ! empty( $get_settings ) ) {
-			$applicable     = $get_settings['apply'];
-			$auth_activated = $get_settings['activate'];
-			$message        = $get_settings['message'];
-			$password       = $get_settings['password'];
-			$username       = $get_settings['username'];
-
-			if ( 'site' === $applicable ) {
-				$http_apply_admin = '';
-				$http_apply_site  = 'checked';
-			}
-
-			if ( 'on' === $auth_activated ) {
-				$http_activated = 'checked';
-			}
-		}
+	public function render() {
+		$settings = HTTP_Auth::get_settings();
 		?>
 		<div class="wrap">
 			<h1>
@@ -258,35 +278,41 @@ class HTTP_Auth_Settings {
 			esc_html_e( 'HTTP Auth SETTINGS', 'http-auth' );
 			?>
 			</h1>
-			<form enctype="multipart/form-data" method="POST" action="" id="http-auth">
+			<?php $this->get_notice_output(); ?>
+			<form method="POST" action="" id="http-auth">
 			<?php
 				wp_nonce_field(
-					'http-auth-settings_' . $user_id,
-					'_http_auth_settings_nonce',
+					self::NONCE_ACTION . get_current_user_id(),
+					self::NONCE_NAME,
 					true
 				);
 
-				$this->get_credentials_output( $username, $password );
-				$this->get_message_output( $message );
-				$this->get_for_output( $http_apply_site, $http_apply_admin );
+				$this->get_credentials_output(
+					$settings['username'],
+					'' !== $settings['password']
+				);
+				$this->get_message_output( $settings['message'] );
+				$this->get_for_output( $settings['apply'] );
 			?>
 
 			<table class="http-auth-table">
 				<tbody>
 					<tr>
 						<td>
-							<input type="checkbox" name="http_auth_activate" value="on" <?php echo esc_html( $http_activated ); ?> />
-							<strong>
-								<?php
-								esc_html_e( 'Activate', 'http-auth' );
-								?>
-							</strong>
+							<label>
+								<input type="checkbox" name="http_auth_activate" value="on" <?php checked( 'on', $settings['activate'] ); ?> />
+								<strong>
+									<?php
+									esc_html_e( 'Activate', 'http-auth' );
+									?>
+								</strong>
+							</label>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 			<p class="submit">
-				<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php esc_html_e( 'Save Changes', 'http-auth' ); ?>" />
+				<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Save Changes', 'http-auth' ); ?>" />
 			</p>
 			</form>
 		</div>
