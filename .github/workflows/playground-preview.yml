@@ -36,6 +36,7 @@ jobs:
                     "resource": "git:directory",
                     "url": ${{ toJSON(github.event.pull_request.head.repo.clone_url) }},
                     "ref": ${{ toJSON(github.event.pull_request.head.ref) }},
+                    "refType": "branch",
                     "path": "/"
                   },
                   "options": {
