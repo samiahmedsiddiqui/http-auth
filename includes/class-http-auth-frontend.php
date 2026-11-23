@@ -246,6 +246,22 @@ class HTTP_Auth_Frontend {
 	}
 
 	/**
+	 * Keep page caches from storing or serving protected pages.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 */
+	private function prevent_caching() {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
+	}
+
+	/**
 	 * Check HTTP Auth activated and then apply HTTP Authentication.
 	 *
 	 * @access public
@@ -258,6 +274,8 @@ class HTTP_Auth_Frontend {
 		) {
 			return;
 		}
+
+		$this->prevent_caching();
 
 		/**
 		 * Filters the failed attempts allowed per IP. 0 disables throttling.
