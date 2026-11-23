@@ -19,7 +19,7 @@
 		"lint:css": "npx stylelint **/*.css"
 	},
 	"devDependencies": {
-		"@wordpress/stylelint-config": "23.6.0",
+		"@wordpress/stylelint-config": "27.2.0",
 		"clean-css": "5.3.3"
 	}
 }
