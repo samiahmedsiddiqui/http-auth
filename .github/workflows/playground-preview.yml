@@ -21,7 +21,7 @@ jobs:
           blueprint: |
             {
               "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-              "landingPage": "/wp-admin/admin.php?page=http-auth-settings",
+              "landingPage": "/wp-admin/options-general.php?page=http-auth-settings",
               "preferredVersions": {
                 "php": "8.3",
                 "wp": "latest"
