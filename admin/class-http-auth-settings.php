@@ -146,6 +146,70 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
+	 * Warn when a row's mode is set but not active.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array      $settings Settings.
+	 * @param array|null $row      Row, null for the default.
+	 */
+	private function get_inactive_warning( $settings, $row ) {
+		$mode = null === $row ? $settings['default'] : $row['mode'];
+		if ( 'none' === $mode || null !== HTTP_Auth_Config::get_row_config( $settings, $row ) ) {
+			return;
+		}
+
+		$labels = $this->get_mode_labels();
+		// translators: %s is replaced with the mode name.
+		echo '<p class="http-auth-warning">' . esc_html( sprintf( __( '%s is not active.', 'http-auth' ), $labels[ $mode ] ) ) . '</p>';
+	}
+
+	/**
+	 * Generate the custom credentials fields of a row.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string     $name        Field name prefix.
+	 * @param array|null $credentials Custom credentials, null if none.
+	 * @param string     $site        Site name for labels.
+	 */
+	private function get_row_credentials_output( $name, $credentials, $site ) {
+		$custom = null !== $credentials;
+		$id     = 'http-auth-' . md5( $name );
+		?>
+		<details class="http-auth-creds">
+			<summary>
+				<?php
+				if ( $custom ) {
+					// translators: %s is replaced with the username.
+					echo esc_html( sprintf( __( 'Custom credentials: %s', 'http-auth' ), $credentials['username'] ) );
+				} else {
+					esc_html_e( 'Mode credentials', 'http-auth' );
+				}
+				?>
+			</summary>
+			<div class="http-auth-creds-fields">
+				<label>
+					<input type="checkbox" name="<?php echo esc_attr( $name . '[custom]' ); ?>" value="1" <?php checked( $custom ); ?> />
+					<?php
+					// translators: %s is replaced with the site URL.
+					echo esc_html( sprintf( __( 'Use custom credentials for %s', 'http-auth' ), $site ) );
+					?>
+				</label>
+				<label for="<?php echo esc_attr( $id . '-user' ); ?>"><?php esc_html_e( 'Username', 'http-auth' ); ?></label>
+				<input type="text" id="<?php echo esc_attr( $id . '-user' ); ?>" name="<?php echo esc_attr( $name . '[username]' ); ?>" value="<?php echo esc_attr( $custom ? $credentials['username'] : '' ); ?>" autocomplete="off" />
+				<label for="<?php echo esc_attr( $id . '-pass' ); ?>"><?php esc_html_e( 'Password', 'http-auth' ); ?></label>
+				<input type="password" id="<?php echo esc_attr( $id . '-pass' ); ?>" name="<?php echo esc_attr( $name . '[password]' ); ?>" value="" autocomplete="new-password" placeholder="<?php echo $custom ? esc_attr__( 'Leave blank to keep it', 'http-auth' ) : ''; ?>" />
+				<label for="<?php echo esc_attr( $id . '-msg' ); ?>"><?php esc_html_e( 'Message (optional)', 'http-auth' ); ?></label>
+				<textarea id="<?php echo esc_attr( $id . '-msg' ); ?>" name="<?php echo esc_attr( $name . '[message]' ); ?>" rows="2"><?php echo esc_textarea( $custom ? $credentials['message'] : '' ); ?></textarea>
+			</div>
+		</details>
+		<?php
+	}
+
+	/**
 	 * Generate the Sites tab HTML.
 	 *
 	 * @access private
@@ -204,10 +268,12 @@ class HTTP_Auth_Settings {
 									// translators: %s is replaced with the site URL.
 									sprintf( __( 'Protection for %s', 'http-auth' ), $row['url'] )
 								);
-								if ( 'none' !== $row['mode'] && ! HTTP_Auth_Config::is_mode_enabled( $settings['modes'][ $row['mode'] ] ) ) {
-									// translators: %s is replaced with the mode name.
-									echo '<p class="http-auth-warning">' . esc_html( sprintf( __( '%s is not active.', 'http-auth' ), $labels[ $row['mode'] ] ) ) . '</p>';
-								}
+								$this->get_inactive_warning( $settings, $row );
+								$this->get_row_credentials_output(
+									$name,
+									isset( $row['credentials'] ) ? $row['credentials'] : null,
+									$row['url']
+								);
 								?>
 							</td>
 							<td class="http-auth-col-remove">
@@ -231,7 +297,11 @@ class HTTP_Auth_Settings {
 						</td>
 						<td><span class="http-auth-source"><?php esc_html_e( 'Default', 'http-auth' ); ?></span></td>
 						<td>
-							<?php $this->get_mode_select( 'http_auth_default', $settings['default'], array( 'none', 'admin' ), __( 'Protection for any other site', 'http-auth' ) ); ?>
+							<?php
+							$this->get_mode_select( 'http_auth_default', $settings['default'], array( 'none', 'admin' ), __( 'Protection for any other site', 'http-auth' ) );
+							$this->get_inactive_warning( $settings, null );
+							$this->get_row_credentials_output( 'http_auth_default_creds', $settings['default_credentials'], __( 'any other site', 'http-auth' ) );
+							?>
 						</td>
 						<td class="http-auth-col-remove"></td>
 					</tr>
@@ -410,10 +480,14 @@ class HTTP_Auth_Settings {
 	private function get_sidebar_output( $tab, $settings ) {
 		$labels = $this->get_mode_labels();
 		$mode   = HTTP_Auth_Config::get_current_mode( $settings );
+		$config = HTTP_Auth_Config::get_row_config( $settings, HTTP_Auth_Config::match_site( HTTP_Auth_Config::get_sites( $settings ) ) );
 		$status = $labels[ $mode ];
-		if ( 'none' !== $mode && ! HTTP_Auth_Config::is_mode_enabled( $settings['modes'][ $mode ] ) ) {
+		if ( 'none' !== $mode && null === $config ) {
 			// translators: %s is replaced with the mode name.
 			$status = sprintf( __( '%s (not active)', 'http-auth' ), $labels[ $mode ] );
+		} elseif ( null !== $config && $config['custom'] ) {
+			// translators: %s is replaced with the mode name.
+			$status = sprintf( __( '%s with custom credentials', 'http-auth' ), $labels[ $mode ] );
 		}
 		?>
 		<div class="http-auth-card">
@@ -449,7 +523,7 @@ class HTTP_Auth_Settings {
 						<strong><?php esc_html_e( 'Complete Site', 'http-auth' ); ?></strong>
 						<?php esc_html_e( 'protects every page.', 'http-auth' ); ?>
 					</li>
-					<li><?php esc_html_e( 'Each mode has its own credentials.', 'http-auth' ); ?></li>
+					<li><?php esc_html_e( 'Each mode has its own credentials. A site can use custom credentials instead.', 'http-auth' ); ?></li>
 					<li><?php esc_html_e( 'Sites not listed use the default: None or Admin Site.', 'http-auth' ); ?></li>
 				</ul>
 			</div>
@@ -595,17 +669,19 @@ class HTTP_Auth_Settings {
 		$modes     = array( 'none', 'admin', 'site' );
 		$rows      = array();
 
+		// Fields are sanitized one by one below, passwords are kept as typed.
 		$posted = array();
 		if ( isset( $_POST['http_auth_rows'] ) && is_array( $_POST['http_auth_rows'] ) ) {
-			$posted = map_deep( wp_unslash( $_POST['http_auth_rows'] ), 'sanitize_text_field' );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$posted = wp_unslash( $_POST['http_auth_rows'] );
 		}
 
 		foreach ( $posted as $item ) {
-			if ( ! is_array( $item ) || ! isset( $item['url'] ) ) {
+			if ( ! is_array( $item ) || ! isset( $item['url'] ) || ! is_string( $item['url'] ) ) {
 				continue;
 			}
 
-			$url     = HTTP_Auth_Config::normalize_url( $item['url'] );
+			$url     = HTTP_Auth_Config::normalize_url( sanitize_text_field( $item['url'] ) );
 			$is_code = in_array( $url, $code_urls, true );
 			if ( ! HTTP_Auth_Config::is_valid_url( $url ) || isset( $rows[ $url ] )
 				|| ( ! $is_code && ! empty( $item['remove'] ) )
@@ -613,11 +689,34 @@ class HTTP_Auth_Settings {
 				continue;
 			}
 
+			$mode = isset( $item['mode'] ) && is_string( $item['mode'] ) ? sanitize_key( $item['mode'] ) : '';
+
 			$rows[ $url ] = array(
 				'url'    => $url,
-				'mode'   => isset( $item['mode'] ) && in_array( $item['mode'], $modes, true ) ? $item['mode'] : 'none',
+				'mode'   => in_array( $mode, $modes, true ) ? $mode : 'none',
 				'source' => $is_code ? 'code' : 'settings',
 			);
+
+			$existing    = isset( $settings['sites'][ $url ]['credentials'] ) ? $settings['sites'][ $url ]['credentials'] : null;
+			$credentials = $this->get_posted_credentials( $item, $existing );
+			if ( is_string( $credentials ) ) {
+				$this->redirect( 'sites', $credentials );
+			}
+
+			if ( null !== $credentials ) {
+				$rows[ $url ]['credentials'] = $credentials;
+			}
+		}
+
+		$default_item = array();
+		if ( isset( $_POST['http_auth_default_creds'] ) && is_array( $_POST['http_auth_default_creds'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$default_item = wp_unslash( $_POST['http_auth_default_creds'] );
+		}
+
+		$default_credentials = $this->get_posted_credentials( $default_item, $settings['default_credentials'] );
+		if ( is_string( $default_credentials ) ) {
+			$this->redirect( 'sites', $default_credentials );
 		}
 
 		$new_urls = '';
@@ -648,20 +747,50 @@ class HTTP_Auth_Settings {
 			}
 		}
 
-		// Keep data of other features stored on a row.
-		foreach ( $rows as $url => $row ) {
-			if ( isset( $settings['sites'][ $url ]['credentials'] ) ) {
-				$rows[ $url ]['credentials'] = $settings['sites'][ $url ]['credentials'];
-			}
-		}
-
-		$settings['sites']   = $rows;
-		$settings['default'] = isset( $_POST['http_auth_default'] ) && 'admin' === $_POST['http_auth_default'] ? 'admin' : 'none';
+		$settings['sites']               = $rows;
+		$settings['default_credentials'] = $default_credentials;
+		$settings['default']             = isset( $_POST['http_auth_default'] ) && 'admin' === $_POST['http_auth_default'] ? 'admin' : 'none';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		HTTP_Auth_Config::save_settings( $settings );
 
 		$this->redirect( 'sites', 'saved' );
+	}
+
+	/**
+	 * Get custom credentials posted for a row.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array      $item     Posted row fields, unslashed.
+	 * @param array|null $existing Saved custom credentials, null if none.
+	 *
+	 * @return array|string|null Credentials, an error code, or null if not custom.
+	 */
+	private function get_posted_credentials( $item, $existing ) {
+		if ( empty( $item['custom'] ) ) {
+			return null;
+		}
+
+		$username = isset( $item['username'] ) && is_string( $item['username'] ) ? trim( $item['username'] ) : '';
+		$password = isset( $item['password'] ) && is_string( $item['password'] ) ? trim( $item['password'] ) : '';
+		$message  = isset( $item['message'] ) && is_string( $item['message'] ) ? sanitize_textarea_field( $item['message'] ) : '';
+
+		if ( '' === $username || ( '' === $password && null === $existing ) ) {
+			return 'missing-custom-credentials';
+		}
+
+		// Basic auth sends `username:password` so the username can't have a colon.
+		if ( false !== strpos( $username, ':' ) ) {
+			return 'invalid-username';
+		}
+
+		return array(
+			'username' => $username,
+			'password' => '' === $password ? $existing['password'] : wp_hash_password( $password ),
+			'message'  => $message,
+		);
 	}
 
 	/**
@@ -750,10 +879,11 @@ class HTTP_Auth_Settings {
 		}
 
 		$notices = array(
-			'saved'               => array( 'success', __( 'Settings saved.', 'http-auth' ) ),
-			'missing-credentials' => array( 'error', __( 'Username and password are required.', 'http-auth' ) ),
-			'invalid-username'    => array( 'error', __( 'Username can not contain a colon (:).', 'http-auth' ) ),
-			'invalid-urls'        => array( 'error', __( 'One or more site URLs are invalid.', 'http-auth' ) ),
+			'saved'                      => array( 'success', __( 'Settings saved.', 'http-auth' ) ),
+			'missing-credentials'        => array( 'error', __( 'Username and password are required.', 'http-auth' ) ),
+			'invalid-username'           => array( 'error', __( 'Username can not contain a colon (:).', 'http-auth' ) ),
+			'invalid-urls'               => array( 'error', __( 'One or more site URLs are invalid.', 'http-auth' ) ),
+			'missing-custom-credentials' => array( 'error', __( 'Custom credentials need a username and password.', 'http-auth' ) ),
 		);
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
