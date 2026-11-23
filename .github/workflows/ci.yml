@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP ${{ matrix.php }} syntax
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.2', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+      - name: Check syntax
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            php -l "$file" > /dev/null || { php -l "$file"; status=1; }
+          done < <(find . -name '*.php' -not -path './vendor/*' -not -path './node_modules/*' -print0)
+          exit $status
+  phpcs:
+    name: Coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+      - run: composer install --no-interaction --no-progress
+      - run: composer lint
+
+  css:
+    name: CSS lint and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:css
+      - name: Minified CSS is up to date
+        run: |
+          npm run build
+          git diff --exit-code -- assets/css
