@@ -529,6 +529,42 @@ class HTTP_Auth_Settings {
 			</div>
 		</div>
 		<?php
+		$this->get_support_output();
+	}
+
+	/**
+	 * Generate the Support card HTML.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 */
+	private function get_support_output() {
+		$links = array(
+			'https://wordpress.org/support/plugin/http-auth/'               => __( 'Support forum', 'http-auth' ),
+			'https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post' => __( 'Rate HTTP Auth', 'http-auth' ),
+			'https://github.com/samiahmedsiddiqui/http-auth'                => __( 'GitHub', 'http-auth' ),
+			'https://profiles.wordpress.org/sasiddiqui/#content-plugins'     => __( 'More plugins by Sami', 'http-auth' ),
+		);
+		?>
+		<div class="http-auth-card">
+			<div class="http-auth-card-header">
+				<h2><?php esc_html_e( 'Support', 'http-auth' ); ?></h2>
+			</div>
+			<div class="http-auth-card-body">
+				<p>
+					<?php
+					// translators: %s is replaced with the plugin version.
+					echo esc_html( sprintf( __( 'Version %s', 'http-auth' ), HTTP_AUTH_VERSION ) );
+					?>
+				</p>
+				<ul class="http-auth-links">
+					<?php foreach ( $links as $url => $label ) : ?>
+						<li><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $label ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**

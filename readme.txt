@@ -150,7 +150,7 @@ Use the `http_auth_is_protected_request` filter and return `false` for the reque
 * The site list is stored so environment pushes (WP Engine, Kinsta, Pantheon) can not rewrite it.
 * Custom credentials per site.
 * Multisite: network wide settings in Network Admin, each site's old settings are imported.
-* Settings moved under Settings > HTTP Auth, with a new design.
+* Settings moved under Settings > HTTP Auth, with a new design and a Support box. The About page was removed.
 * Security: passwords are hashed and never shown, fixed a query string bypass of the admin only mode, XML-RPC is protected in Admin Site mode, failed attempts are throttled.
 * Fixed passwords with special characters (`&`, `"`, `<`) never matching.
 * Fixed CGI/FastCGI servers asking for the password again and again.

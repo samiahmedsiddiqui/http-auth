@@ -17,6 +17,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  */
 function http_auth_delete_options() {
 	delete_option( 'http_auth_config' );
+	delete_option( 'http_auth_moved_notice' );
 	delete_option( 'http_auth_settings' );
 	delete_option( 'http_auth_plugin_version' );
 	delete_option( 'http_auth_db_version' );
@@ -24,6 +25,7 @@ function http_auth_delete_options() {
 
 if ( is_multisite() ) {
 	delete_site_option( 'http_auth_config' );
+	delete_site_option( 'http_auth_moved_notice' );
 	delete_site_option( 'http_auth_settings' );
 	delete_site_option( 'http_auth_db_version' );
 

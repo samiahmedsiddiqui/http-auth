@@ -37,6 +37,13 @@ class HTTP_Auth_Config {
 	const URLS_CONSTANT = 'HTTP_AUTH_SITE_URLS';
 
 	/**
+	 * Option set on upgrade to show the settings moved notice once.
+	 *
+	 * @var string
+	 */
+	const MOVED_NOTICE = 'http_auth_moved_notice';
+
+	/**
 	 * Allowed URL pattern after normalizing.
 	 *
 	 * @var string
@@ -149,6 +156,46 @@ class HTTP_Auth_Config {
 			update_site_option( self::OPTION, $stored );
 		} else {
 			update_option( self::OPTION, $stored, true );
+		}
+	}
+
+	/**
+	 * Whether the settings moved notice should be shown.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @return bool
+	 */
+	public static function has_moved_notice() {
+		return (bool) ( self::is_network_mode() ? get_site_option( self::MOVED_NOTICE ) : get_option( self::MOVED_NOTICE ) );
+	}
+
+	/**
+	 * Show the settings moved notice.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 */
+	private static function add_moved_notice() {
+		if ( self::is_network_mode() ) {
+			update_site_option( self::MOVED_NOTICE, 1 );
+		} else {
+			update_option( self::MOVED_NOTICE, 1, false );
+		}
+	}
+
+	/**
+	 * Stop showing the settings moved notice.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 */
+	public static function delete_moved_notice() {
+		if ( self::is_network_mode() ) {
+			delete_site_option( self::MOVED_NOTICE );
+		} else {
+			delete_option( self::MOVED_NOTICE );
 		}
 	}
 
@@ -635,6 +682,11 @@ class HTTP_Auth_Config {
 
 		$settings['legacy_hash'] = $hash;
 		self::put_raw( $settings );
+
+		// First upgrade from an older version.
+		if ( ! $is_current && ( false !== $legacy || false !== get_option( 'http_auth_username' ) ) ) {
+			self::add_moved_notice();
+		}
 	}
 
 	/**
@@ -650,6 +702,7 @@ class HTTP_Auth_Config {
 		}
 
 		$settings = self::defaults();
+		$imported = false;
 		$main     = get_main_site_id();
 		$site_ids = get_sites(
 			array(
@@ -684,10 +737,15 @@ class HTTP_Auth_Config {
 
 			if ( null !== $flat ) {
 				$settings = self::apply_flat( $settings, $flat, $home_url, true );
+				$imported = true;
 			}
 		}
 
 		self::put_raw( $settings );
+
+		if ( $imported ) {
+			self::add_moved_notice();
+		}
 	}
 
 	/**
