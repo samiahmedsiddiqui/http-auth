@@ -2,6 +2,7 @@
 Contributors: sasiddiqui
 Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
 Requires at least: 4.9
+Requires PHP: 7.2
 Tested up to: 6.8
 Stable tag: 1.0.1
 License: GPLv3
@@ -95,7 +96,7 @@ You can also list every environment in `wp-config.php`, a plugin or your theme's
 
 `define( 'HTTP_AUTH_SITE_URLS', array( 'example.com', 'staging.example.com' ) );`
 
-On PHP 5.6 use a comma separated string instead of an array. The `http_auth_site_urls` filter works too. Then choose the protection for each URL in the Sites tab.
+A comma separated string works too, and so does the `http_auth_site_urls` filter. Then choose the protection for each URL in the Sites tab.
 
 = How does it work on multisite? =
 
