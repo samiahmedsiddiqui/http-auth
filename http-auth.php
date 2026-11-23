@@ -5,7 +5,7 @@
  * Description: Secure your website from the Brute-force attack.
  * Version: 1.0.1
  * Requires at least: 4.9
- * Requires PHP: 5.6
+ * Requires PHP: 7.2
  * Author: Sami Ahmed Siddiqui
  * Author URI: https://www.linkedin.com/in/sami-ahmed-siddiqui/
  * License: GPLv3

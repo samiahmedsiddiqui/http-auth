@@ -371,7 +371,7 @@ class HTTP_Auth_Config {
 		if ( defined( self::URLS_CONSTANT ) ) {
 			$urls = constant( self::URLS_CONSTANT );
 			if ( is_string( $urls ) ) {
-				// Comma or line separated for PHP 5.6, which can't define arrays.
+				// A comma or line separated string works too.
 				$urls = preg_split( '/[\s,]+/', $urls );
 			}
 		}
