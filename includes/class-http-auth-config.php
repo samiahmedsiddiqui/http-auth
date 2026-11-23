@@ -65,13 +65,15 @@ class HTTP_Auth_Config {
 	 */
 	public static function defaults() {
 		return array(
-			'modes'       => array(
+			'modes'               => array(
 				'site'  => self::$default_mode,
 				'admin' => self::$default_mode,
 			),
-			'default'     => 'none',
-			'sites'       => array(),
-			'legacy_hash' => '',
+			'default'             => 'none',
+			// Custom credentials of the default, like a site row.
+			'default_credentials' => null,
+			'sites'               => array(),
+			'legacy_hash'         => '',
 		);
 	}
 
@@ -135,8 +137,9 @@ class HTTP_Auth_Config {
 			// Encoded so search-replace on environment pushes can't rewrite URLs.
 			'sites'       => self::encode(
 				array(
-					'default' => $settings['default'],
-					'sites'   => array_values( $settings['sites'] ),
+					'default'             => $settings['default'],
+					'default_credentials' => $settings['default_credentials'],
+					'sites'               => array_values( $settings['sites'] ),
 				)
 			),
 			'legacy_hash' => $settings['legacy_hash'],
@@ -224,6 +227,10 @@ class HTTP_Auth_Config {
 			$settings['default'] = 'admin';
 		}
 
+		if ( isset( $sites['default_credentials'] ) ) {
+			$settings['default_credentials'] = self::sanitize_credentials( $sites['default_credentials'] );
+		}
+
 		if ( isset( $sites['sites'] ) && is_array( $sites['sites'] ) ) {
 			foreach ( $sites['sites'] as $row ) {
 				$row = self::sanitize_row( $row );
@@ -268,9 +275,36 @@ class HTTP_Auth_Config {
 			'source' => isset( $row['source'] ) && 'code' === $row['source'] ? 'code' : 'settings',
 		);
 
-		// Kept for the per-site credentials feature.
-		if ( isset( $row['credentials'] ) && is_array( $row['credentials'] ) ) {
-			$clean['credentials'] = $row['credentials'];
+		$credentials = isset( $row['credentials'] ) ? self::sanitize_credentials( $row['credentials'] ) : null;
+		if ( null !== $credentials ) {
+			$clean['credentials'] = $credentials;
+		}
+
+		return $clean;
+	}
+
+	/**
+	 * Validate custom credentials.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param mixed $credentials Array with `username`, `password` (hash) and `message`.
+	 *
+	 * @return array|null Null unless both username and password are set.
+	 */
+	public static function sanitize_credentials( $credentials ) {
+		if ( ! is_array( $credentials ) ) {
+			return null;
+		}
+
+		$clean = array();
+		foreach ( array( 'username', 'password', 'message' ) as $key ) {
+			$clean[ $key ] = isset( $credentials[ $key ] ) && is_string( $credentials[ $key ] ) ? $credentials[ $key ] : '';
+		}
+
+		if ( '' === $clean['username'] || '' === $clean['password'] ) {
+			return null;
 		}
 
 		return $clean;
@@ -493,21 +527,57 @@ class HTTP_Auth_Config {
 	}
 
 	/**
+	 * Get the settings applied to a site row, or to the default when null.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 *
+	 * @param array      $settings Settings from get_settings().
+	 * @param array|null $row      Row from get_sites(), null for the default.
+	 *
+	 * @return array|null Settings with `mode` and `custom`, null if not protected.
+	 */
+	public static function get_row_config( $settings, $row ) {
+		$mode = null === $row ? $settings['default'] : $row['mode'];
+		if ( 'none' === $mode || self::is_disabled() || 'on' !== $settings['modes'][ $mode ]['activate'] ) {
+			return null;
+		}
+
+		// Custom credentials replace the mode ones, the mode's switch still applies.
+		$config      = $settings['modes'][ $mode ];
+		$credentials = null === $row ? $settings['default_credentials'] : ( isset( $row['credentials'] ) ? $row['credentials'] : null );
+		$custom      = null !== $credentials;
+
+		if ( $custom ) {
+			$config['username'] = $credentials['username'];
+			$config['password'] = $credentials['password'];
+			if ( '' !== $credentials['message'] ) {
+				$config['message'] = $credentials['message'];
+			}
+		}
+
+		if ( '' === $config['username'] || '' === $config['password'] ) {
+			return null;
+		}
+
+		$config['mode']   = $mode;
+		$config['custom'] = $custom;
+
+		return $config;
+	}
+
+	/**
 	 * Get the settings applied to the current request.
 	 *
 	 * @access public
 	 * @since  1.1.0
 	 *
-	 * @return array|null Mode settings with `mode`, null if not protected.
+	 * @return array|null Settings with `mode`, null if not protected.
 	 */
 	public static function get_current_config() {
 		$settings = self::get_settings();
-		$mode     = self::get_current_mode( $settings );
-		if ( 'none' === $mode || ! self::is_mode_enabled( $settings['modes'][ $mode ] ) ) {
-			return null;
-		}
 
-		return array_merge( $settings['modes'][ $mode ], array( 'mode' => $mode ) );
+		return self::get_row_config( $settings, self::match_site( self::get_sites( $settings ) ) );
 	}
 
 	/**
@@ -617,19 +687,7 @@ class HTTP_Auth_Config {
 			}
 		}
 
-		update_site_option(
-			self::OPTION,
-			array(
-				'modes'       => $settings['modes'],
-				'sites'       => self::encode(
-					array(
-						'default' => $settings['default'],
-						'sites'   => array_values( $settings['sites'] ),
-					)
-				),
-				'legacy_hash' => '',
-			)
-		);
+		self::put_raw( $settings );
 	}
 
 	/**
@@ -682,7 +740,7 @@ class HTTP_Auth_Config {
 			$row['mode'] = 'none';
 		}
 
-		// Different credentials, kept for the per-site credentials feature.
+		// Different credentials become the row's custom credentials.
 		$current       = $settings['modes'][ $mode ];
 		$same_password = isset( $flat['plain'] )
 			? wp_check_password( $flat['plain'], $current['password'] )
