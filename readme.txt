@@ -77,6 +77,10 @@ Each has its own credentials, message and activation.
 
 In the **Sites** tab, choose None, Admin Site or Complete Site for each site URL. Sites not listed use the default, which can be None or Admin Site.
 
+= Can a site use its own credentials? =
+
+Yes. In the Sites tab, open "Mode credentials" under a site (or "Any other site"), tick "Use custom credentials" and set a username, password and optional message. That site then asks for these instead of its mode's credentials. Turning the mode off in its tab still turns that site's protection off.
+
 = How are site URLs matched? =
 
 URLs are written without `http(s)://`, e.g. `example.com` or `example.com/blog` for a subdirectory site. Use `*` as a wildcard, e.g. `*.example.com`. An exact URL wins over a wildcard, and a more specific wildcard wins over a broader one.
@@ -95,7 +99,7 @@ On PHP 5.6 use a comma separated string instead of an array. The `http_auth_site
 
 = How does it work on multisite? =
 
-When network activated, the settings are in Network Admin and the Sites tab covers every site in the network. Settings from each site of older versions are imported on upgrade.
+When network activated, the settings are in Network Admin and the Sites tab covers every site in the network. Settings from each site of older versions are imported on upgrade, including sites that used different credentials.
 
 = "Complete Site" is on but some pages open without a prompt. =
 
