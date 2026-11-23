@@ -30,6 +30,9 @@ class HTTP_Auth_Admin {
 				array( $this, 'settings_link' )
 			);
 		}
+
+		add_action( HTTP_Auth_Config::is_network_mode() ? 'network_admin_notices' : 'admin_notices', array( $this, 'moved_notice' ) );
+		add_action( 'admin_init', array( $this, 'maybe_dismiss_moved_notice' ) );
 	}
 
 	/**
@@ -69,7 +72,7 @@ class HTTP_Auth_Admin {
 	}
 
 	/**
-	 * Add the settings page under Settings and a hidden About page.
+	 * Add the settings page under Settings.
 	 *
 	 * @access public
 	 * @since  0.1
@@ -83,23 +86,11 @@ class HTTP_Auth_Admin {
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
-		$about_page    = add_submenu_page(
-			'',
-			__( 'About HTTP Auth', 'http-auth' ),
-			__( 'About', 'http-auth' ),
-			self::get_capability(),
-			'http-auth-about-plugins',
-			array( $this, 'about_plugin' )
-		);
 
 		add_action( 'load-' . $settings_page, array( $this, 'save_settings' ) );
 		add_action(
 			'admin_print_styles-' . $settings_page,
 			array( $this, 'add_settings_page_style' )
-		);
-		add_action(
-			'admin_print_styles-' . $about_page,
-			array( $this, 'add_about_style' )
 		);
 	}
 
@@ -117,21 +108,6 @@ class HTTP_Auth_Admin {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.css' : '.min.css';
 
 		return plugins_url( '/assets/css/' . $name . $suffix, HTTP_AUTH_FILE );
-	}
-
-	/**
-	 * Add about page style.
-	 *
-	 * @access public
-	 * @since  1.0.0
-	 */
-	public function add_about_style() {
-		wp_enqueue_style(
-			'http-auth-about-style',
-			$this->get_style_url( 'about-plugins' ),
-			array(),
-			HTTP_AUTH_VERSION
-		);
 	}
 
 	/**
@@ -156,6 +132,9 @@ class HTTP_Auth_Admin {
 	 * @since  1.1.0
 	 */
 	public function save_settings() {
+		// The user found the new location.
+		HTTP_Auth_Config::delete_moved_notice();
+
 		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-settings.php';
 		$settings = new HTTP_Auth_Settings();
 		$settings->maybe_save();
@@ -177,20 +156,7 @@ class HTTP_Auth_Admin {
 	}
 
 	/**
-	 * Add About Plugins Page
-	 *
-	 * @access public
-	 * @since  0.3
-	 */
-	public function about_plugin() {
-		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-about.php';
-		new HTTP_Auth_About();
-
-		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
-	}
-
-	/**
-	 * Add Plugin Support and Follow Message in the footer of Admin Pages.
+	 * Ask for a review and link to support in the footer of the settings page.
 	 *
 	 * @access public
 	 * @since  0.3
@@ -198,24 +164,62 @@ class HTTP_Auth_Admin {
 	 * @return string
 	 */
 	public function admin_footer_text() {
-		$footer_text = sprintf(
-			// translators: placeholders like %2$s replaced with the link.
-			__(
-				'HTTP Auth version %1$s by <a href="%2$s" title="YAS Global Website" target="_blank">YAS Global</a> - <a href="%3$s" title="Support forums" target="_blank">Support forums</a> - Follow on Twitter: <a href="%4$s" title="Follow YAS Global on Twitter" target="_blank">YAS Global</a>',
-				'http-auth'
-			),
-			HTTP_AUTH_VERSION,
-			'https://www.yasglobal.com',
-			'https://wordpress.org/support/plugin/http-auth',
-			'https://twitter.com/samisiddiqui91'
-		);
+		$link = '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>';
 
-		return $footer_text;
+		return sprintf(
+			// translators: %s is replaced with a five star rating link.
+			esc_html__( 'Enjoying HTTP Auth? Please leave a %s rating.', 'http-auth' ),
+			sprintf( $link, esc_url( 'https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post' ), '&#9733;&#9733;&#9733;&#9733;&#9733;' )
+		) . ' &middot; ' . sprintf( $link, esc_url( 'https://wordpress.org/support/plugin/http-auth/' ), esc_html__( 'Support forum', 'http-auth' ) )
+			. ' &middot; ' . sprintf( $link, esc_url( 'https://github.com/samiahmedsiddiqui/http-auth' ), 'GitHub' );
 	}
 
 	/**
-	 * Plugin About, Contact and Settings Link on the Plugin Page under
-	 * the Plugin Name.
+	 * Tell upgraded sites once that the settings moved under Settings.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 */
+	public function moved_notice() {
+		$screen = get_current_screen();
+		if ( ! HTTP_Auth_Config::has_moved_notice() || ! current_user_can( self::get_capability() )
+			|| null === $screen || ! in_array( $screen->base, array( 'dashboard', 'plugins' ), true )
+		) {
+			return;
+		}
+
+		$dismiss = wp_nonce_url( add_query_arg( 'http-auth-dismiss-moved', '1' ), 'http-auth-dismiss-moved' );
+		printf(
+			'<div class="notice notice-info"><p>%1$s</p><p><a href="%2$s" class="button button-primary">%3$s</a> <a href="%4$s" class="button">%5$s</a></p></div>',
+			esc_html__( 'HTTP Auth settings have moved to Settings > HTTP Auth. Your settings were kept.', 'http-auth' ),
+			esc_url( self::get_page_url( 'http-auth-settings' ) ),
+			esc_html__( 'Open settings', 'http-auth' ),
+			esc_url( $dismiss ),
+			esc_html__( 'Dismiss', 'http-auth' )
+		);
+	}
+
+	/**
+	 * Dismiss the moved notice.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 */
+	public function maybe_dismiss_moved_notice() {
+		if ( ! isset( $_GET['http-auth-dismiss-moved'], $_GET['_wpnonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'http-auth-dismiss-moved' )
+			|| ! current_user_can( self::get_capability() )
+		) {
+			return;
+		}
+
+		HTTP_Auth_Config::delete_moved_notice();
+		wp_safe_redirect( remove_query_arg( array( 'http-auth-dismiss-moved', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
+	 * Contact and Settings links under the plugin name on the Plugins page.
 	 *
 	 * @access public
 	 * @since  0.3
@@ -225,12 +229,6 @@ class HTTP_Auth_Admin {
 	 * @return array $links Add links in the array and return it.
 	 */
 	public function settings_link( $links ) {
-		$about = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( self::get_page_url( 'http-auth-about-plugins' ) ),
-			esc_html__( 'About', 'http-auth' )
-		);
-
 		$contact = sprintf(
 			'<a href="%s" target="_blank">%s</a>',
 			esc_url( 'https://www.yasglobal.com/#request-form' ),
@@ -245,7 +243,6 @@ class HTTP_Auth_Admin {
 
 		array_unshift( $links, $settings );
 		array_unshift( $links, $contact );
-		array_unshift( $links, $about );
 
 		return $links;
 	}

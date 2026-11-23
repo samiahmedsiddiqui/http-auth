@@ -1,59 +1,62 @@
 === HTTP Auth ===
 Contributors: sasiddiqui
-Tags: http-auth, brute attack, brute-force, restrict site, prevent-crawl
+Tags: http auth, basic auth, password protect, staging, brute force
 Requires at least: 4.9
 Requires PHP: 7.2
-Tested up to: 6.8
-Stable tag: 1.0.1
+Tested up to: 7.1
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Provides comprehensive security during development by protecting your entire site and your admin pages from brute-force attacks.
+HTTP Basic Auth for WordPress: protect admin pages on production and complete staging or dev sites, per site and multisite ready.
 
 == Description ==
 
-This plugin empowers you to set up HTTP Authentication for your website. This adds an extra layer of security by requiring a username and password to access specific areas.
+HTTP Auth adds a browser username and password prompt (HTTP Basic Authentication) in front of your site, before WordPress or any login form loads.
 
-Here's how it benefits you:
+Use it to:
 
-* **Enhanced Admin Security:** Shield your admin pages from brute-force attacks by adding a login barrier.
-* **Controlled Crawling:** Restrict crawlers from accessing your site during development, preventing unnecessary indexing.
-* **Post-Launch Access Control:** Maintain control over admin page access even after your website goes live.
-* **Easy Activation/Deactivation:** Conveniently enable or disable HTTP Auth without deactivating the plugin entirely.
-* **Per Environment Rules:** Protect only the admin on production and the complete site on development or staging, each with its own credentials.
-* **Multisite Ready:** Manage the protection of every site in the network from the Network Admin.
+* **Protect production admin pages** from brute-force attacks: the login page, admin pages and XML-RPC ask for an extra username and password.
+* **Hide development and staging sites** from visitors and search engines by protecting every page.
+* **Use one database everywhere.** Choose the protection for each site URL, so production, staging and dev each get the right protection, even after your host copies the site between environments.
+
+= Features =
+
+* **Sites:** set None, Admin Site or Complete Site for each site URL, with wildcards like `*.example.com` and a default for any other site.
+* **Push safe:** hosts like WP Engine, Kinsta and Pantheon rewrite URLs when copying a site. HTTP Auth stores its site list so it is not rewritten, and site URLs can also be defined in `wp-config.php` or code.
+* **Credentials per mode and per site:** Admin Site and Complete Site have their own username, password and message, and any site can use its own instead.
+* **Multisite:** when network activated, manage every site from Network Admin.
+* **Brute-force throttling:** too many failed attempts from one IP are blocked for a while.
+* **Lockout escape:** `define( 'HTTP_AUTH_DISABLE', true );` in `wp-config.php` turns it off without touching settings.
+* **Secure storage:** passwords are hashed, never stored or shown in plain text.
+* **Works with caching, WP-Cron and WP-CLI:** protected pages are not cached, and cron and CLI requests are never blocked.
 
 === Help Us Improve! ===
 
-I am constantly working to enhance this plugin and your feedback is valuable. If you are happy with the plugin, consider leaving a review on WordPress.org. Your positive feedback motivates us to keep improving!
-
-Link to Reviews: [https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post]()
+If you are happy with the plugin, please [leave a review on WordPress.org](https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post). Your feedback keeps it improving.
 
 === Bug Reports ===
 
-We welcome bug reports for HTTP Auth on GitHub: [https://github.com/samiahmedsiddiqui/http-auth](https://github.com/samiahmedsiddiqui/http-auth). Please remember that GitHub is primarily for bug reporting, and issues not classified as genuine bugs may be closed.
+Bug reports are welcome on [GitHub](https://github.com/samiahmedsiddiqui/http-auth/issues). For questions and help, please use the [support forum](https://wordpress.org/support/plugin/http-auth/).
 
 == Installation ==
 
-This process defines you the steps to follow either you are installing through WordPress or Manually from FTP.
+= From within WordPress =
 
-=== From within WordPress ===
+1. Visit Plugins > Add New.
+2. Search for HTTP Auth.
+3. Install and activate HTTP Auth.
 
-1. Visit 'Plugins > Add New'
-2. Search for HTTP Auth
-3. Activate HTTP Auth from your Plugins page.
-4. Go to "after activation" below.
+= Manually =
 
-=== Manually ===
+1. Upload the `http-auth` folder to the `/wp-content/plugins/` directory.
+2. Activate HTTP Auth through the Plugins menu in WordPress.
 
-1. Upload the `http-auth` folder to the `/wp-content/plugins/` directory
-2. Activate HTTP Auth through the 'Plugins' menu in WordPress
-3. Go to "after activation" below.
+= After activation =
 
-=== After activation ===
-
-1. Go to the plugin settings page and set up the plugin for your site.
-2. You're done!
+1. Go to Settings > HTTP Auth (Network Admin > Settings > HTTP Auth when network activated).
+2. In the Admin Site or Complete Site tab, set a username and password and turn on protection.
+3. In the Sites tab, choose the protection for each site URL.
 
 == Frequently Asked Questions ==
 
@@ -102,6 +105,19 @@ A comma separated string works too, and so does the `http_auth_site_urls` filter
 
 When network activated, the settings are in Network Admin and the Sites tab covers every site in the network. Settings from each site of older versions are imported on upgrade, including sites that used different credentials.
 
+= The prompt keeps coming back even with the right password. =
+
+Your server probably runs PHP as CGI or FastCGI and does not pass the `Authorization` header to PHP.
+
+On Apache, HTTP Auth adds this to `.htaccess` when you turn protection on. If `.htaccess` is not writable, add it yourself above the WordPress rules:
+
+`RewriteEngine On`
+`RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]`
+
+On Nginx, make sure the header reaches PHP in your PHP location block:
+
+`fastcgi_param HTTP_AUTHORIZATION $http_authorization;`
+
 = "Complete Site" is on but some pages open without a prompt. =
 
 A page cache is serving copies saved before HTTP Auth was turned on. Protected pages are no longer cached, so clear your caching plugin and any host or CDN cache once after turning it on.
@@ -118,7 +134,31 @@ All visitors may share the proxy IP, so use the `http_auth_client_ip` filter to 
 
 Use the `http_auth_is_protected_request` filter and return `false` for the requests you want to allow.
 
+== Screenshots ==
+
+1. Sites tab: choose None, Admin Site or Complete Site for each site URL, from code or added in settings.
+2. A site with its own credentials.
+3. Complete Site tab: credentials, message and the switch for every site set to Complete Site.
+4. Admin Site tab: credentials, message and the switch for every site set to Admin Site.
+
 == Changelog ==
+
+= 1.1.0 =
+
+* Sites tab: choose None, Admin Site or Complete Site for each site URL, with wildcards and a default for other sites.
+* Site URLs can be defined in code with `HTTP_AUTH_SITE_URLS` or the `http_auth_site_urls` filter.
+* The site list is stored so environment pushes (WP Engine, Kinsta, Pantheon) can not rewrite it.
+* Custom credentials per site.
+* Multisite: network wide settings in Network Admin, each site's old settings are imported.
+* Settings moved under Settings > HTTP Auth, with a new design and a Support box. The About page was removed.
+* Security: passwords are hashed and never shown, fixed a query string bypass of the admin only mode, XML-RPC is protected in Admin Site mode, failed attempts are throttled.
+* Fixed passwords with special characters (`&`, `"`, `<`) never matching.
+* Fixed CGI/FastCGI servers asking for the password again and again.
+* WP-Cron and WP-CLI are no longer blocked.
+* Protected pages are not cached.
+* `HTTP_AUTH_DISABLE` turns protection off from `wp-config.php`.
+* Upgrades from 0.3.x and 1.0.x keep the existing settings, and rolling back to 1.0.x keeps working.
+* Requires PHP 7.2.
 
 = 1.0.1 - Dec 23, 24 =
 
@@ -131,3 +171,9 @@ Fix minor WPCS issues and change text for better understanding.
 = Earlier versions =
 
 	* For the changelog of earlier versions, please refer to the separate changelog.txt file.
+
+== Upgrade Notice ==
+
+= 1.1.0 =
+
+Settings move to Settings > HTTP Auth and gain per-site protection. Existing settings are kept. Requires PHP 7.2. Admin Site mode now also protects XML-RPC.

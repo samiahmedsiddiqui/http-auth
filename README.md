@@ -1,44 +1,72 @@
 # HTTP Auth
 
-This plugin empowers you to set up HTTP Authentication for your website. This adds an extra layer of security by requiring a username and password to access specific areas.
+HTTP Basic Authentication for WordPress: protect admin pages on production and complete staging or development sites, per site and multisite ready.
 
-Here's how it benefits you:
+[WordPress.org](https://wordpress.org/plugins/http-auth/) · [Support forum](https://wordpress.org/support/plugin/http-auth/) · [Packagist](https://packagist.org/packages/samiahmedsiddiqui/http-auth)
 
-- **Enhanced Admin Security:** Shield your admin pages from brute-force attacks by adding a login barrier.
-- **Controlled Crawling:** Restrict crawlers from accessing your site during development, preventing unnecessary indexing.
-- **Post-Launch Access Control:** Maintain control over admin page access even after your website goes live.
-- **Easy Activation/Deactivation:** Conveniently enable or disable HTTP Auth without deactivating the plugin entirely.
+## Features
 
-## Help Us Improve!
+- **Sites:** set None, Admin Site or Complete Site for each site URL, with wildcards like `*.example.com` and a default (None or Admin Site) for any other site.
+- **Admin Site** protects the login page, admin pages and XML-RPC. **Complete Site** protects every page.
+- **Push safe:** the site list is stored so hosts like WP Engine, Kinsta and Pantheon can not rewrite it when copying between environments. Site URLs can also be defined in code.
+- **Credentials per mode and per site**, hashed with `wp_hash_password()`.
+- **Multisite:** network wide settings in Network Admin when network activated.
+- Brute-force throttling, a `wp-config.php` lockout escape, no caching of protected pages, WP-Cron and WP-CLI never blocked.
 
-I am constantly working to enhance this plugin and your feedback is valuable. If you are happy with the plugin, consider leaving a review on WordPress.org. Your positive feedback motivates us to keep improving!
-
-Link to Reviews: [https://wordpress.org/support/plugin/http-auth/reviews/?rate=5#new-post]()
-
-## Bug Reports
-
-We welcome bug reports for HTTP Auth on GitHub: [https://github.com/samiahmedsiddiqui/http-auth/issues](). Please remember that GitHub is primarily for bug reporting, and issues not classified as genuine bugs may be closed.
+Settings live in **Settings > HTTP Auth** (Network Admin > Settings > HTTP Auth on multisite).
 
 ## Installation
 
-This process defines you the steps to follow either you are installing through
-WordPress or Manually from FTP.
+- **WordPress:** Plugins > Add New, search for "HTTP Auth".
+- **Composer (Packagist):** `composer require samiahmedsiddiqui/http-auth`
+- **Composer (WPackagist):** `composer require wpackagist-plugin/http-auth`
 
-### From within WordPress
+Composer installs use [`composer/installers`](https://github.com/composer/installers) to place the plugin in `wp-content/plugins/http-auth/`.
 
-1. Visit 'Plugins > Add New'
-2. Search for `HTTP Auth`
-3. Activate `HTTP Auth` from your Plugins page.
-4. Go to [after activation](#after-activation) below.
+## Configuration in code
 
-### Manually
+List every environment in `wp-config.php`, a plugin or `functions.php`, then choose the protection for each URL in the Sites tab:
 
-1. Upload the `HTTP Auth` folder to the `/wp-content/plugins/` directory
-2. Activate `HTTP Auth` through the 'Plugins' menu in WordPress
-3. Go to [after activation](#after-activation) below.
+```php
+define( 'HTTP_AUTH_SITE_URLS', array( 'example.com', 'staging.example.com', 'dev.example.com' ) );
+```
 
-### After activation
+| Constant | Purpose |
+|---|---|
+| `HTTP_AUTH_SITE_URLS` | Site URLs, as an array or a comma separated string |
+| `HTTP_AUTH_DISABLE` | `true` turns protection off without changing settings |
 
-1. Navigate to the  `HTTP Auth` page from the Admin Dashboard
-2. Set credentials and check the "Activate HTTP Authentication" checkbox
-3. You're done!
+| Filter | Purpose |
+|---|---|
+| `http_auth_site_urls` | Add or change the site URLs defined in code |
+| `http_auth_is_protected_request` | Return `false` to skip protection for a request |
+| `http_auth_max_attempts` | Failed attempts allowed per IP (default `10`, `0` disables throttling) |
+| `http_auth_lockout_duration` | Lockout in seconds (default 15 minutes) |
+| `http_auth_client_ip` | Client IP used for throttling, e.g. behind a proxy |
+
+## Development
+
+Requirements: PHP 7.2+, Composer, Node 22.13+ (see `.nvmrc`).
+
+```bash
+composer install
+npm ci
+```
+
+| Command | What it does |
+|---|---|
+| `composer lint` | PHP coding standards (WPCS, PHPCompatibility) |
+| `composer format` | Fix coding standards automatically |
+| `npm run lint:css` | Stylelint |
+| `npm run build` | Minify `assets/css/*.css` |
+| `npm version <x.y.z>` | Update the version everywhere and rebuild |
+
+CI checks PHP syntax on 7.2 to 8.5, coding standards, stylelint and that the minified CSS is up to date. Every pull request gets a WordPress Playground preview button. Pushing a `v*` tag deploys to WordPress.org.
+
+## Bug reports
+
+Bug reports are welcome in [GitHub issues](https://github.com/samiahmedsiddiqui/http-auth/issues). For questions and help, please use the [support forum](https://wordpress.org/support/plugin/http-auth/).
+
+## License
+
+GPLv3 or later.

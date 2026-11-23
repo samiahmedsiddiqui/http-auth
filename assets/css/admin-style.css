@@ -256,6 +256,14 @@
 	margin-bottom: 6px;
 }
 
+.http-auth-links {
+	margin: 0;
+}
+
+.http-auth-links li {
+	margin-bottom: 6px;
+}
+
 .http-auth-sites code {
 	word-break: break-all;
 }
