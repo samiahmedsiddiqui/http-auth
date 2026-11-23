@@ -32,35 +32,36 @@ class HTTP_Auth_Admin {
 	 */
 	public function admin_menu() {
 		add_menu_page(
-			'HTTP Auth',
-			'HTTP Auth',
+			__( 'HTTP Auth', 'http-auth' ),
+			__( 'HTTP Auth', 'http-auth' ),
 			'activate_plugins',
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
 		$settings_page = add_submenu_page(
 			'http-auth-settings',
-			'HTTP Auth Settings',
-			'Settings',
+			__( 'HTTP Auth Settings', 'http-auth' ),
+			__( 'Settings', 'http-auth' ),
 			'activate_plugins',
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
 		$about_page    = add_submenu_page(
 			'http-auth-settings',
-			'About HTTP Auth',
-			'About',
+			__( 'About HTTP Auth', 'http-auth' ),
+			__( 'About', 'http-auth' ),
 			'activate_plugins',
 			'http-auth-about-plugins',
 			array( $this, 'about_plugin' )
 		);
 
+		add_action( 'load-' . $settings_page, array( $this, 'save_settings' ) );
 		add_action(
-			'admin_print_styles-' . $settings_page . '',
+			'admin_print_styles-' . $settings_page,
 			array( $this, 'add_settings_page_style' )
 		);
 		add_action(
-			'admin_print_styles-' . $about_page . '',
+			'admin_print_styles-' . $about_page,
 			array( $this, 'add_about_style' )
 		);
 	}
@@ -100,6 +101,18 @@ class HTTP_Auth_Admin {
 	}
 
 	/**
+	 * Save settings before the page renders so it can redirect.
+	 *
+	 * @access public
+	 * @since  1.1.0
+	 */
+	public function save_settings() {
+		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-settings.php';
+		$settings = new HTTP_Auth_Settings();
+		$settings->maybe_save();
+	}
+
+	/**
 	 * Settings Page from where user can add/change the HTTP Auth credentials,
 	 * add custom message and choose where to apply the plugin.
 	 *
@@ -108,7 +121,8 @@ class HTTP_Auth_Admin {
 	 */
 	public function admin_settings_page() {
 		include_once HTTP_AUTH_PATH . 'admin/class-http-auth-settings.php';
-		new HTTP_Auth_Settings();
+		$settings = new HTTP_Auth_Settings();
+		$settings->render();
 
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 	}
@@ -163,24 +177,21 @@ class HTTP_Auth_Admin {
 	 */
 	public function settings_link( $links ) {
 		$about = sprintf(
-			// translators: %s replace with the `About` page link.
-			__( '<a href="%s" title="About">About</a>', 'http-auth' ),
-			'admin.php?page=http-auth-about-plugins'
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=http-auth-about-plugins' ) ),
+			esc_html__( 'About', 'http-auth' )
 		);
 
 		$contact = sprintf(
-			// translators: %s replace with the external `Contact` page link.
-			__(
-				'<a href="%s" title="Contact" target="_blank">Contact</a>',
-				'http-auth'
-			),
-			'https://www.yasglobal.com/#request-form'
+			'<a href="%s" target="_blank">%s</a>',
+			esc_url( 'https://www.yasglobal.com/#request-form' ),
+			esc_html__( 'Contact', 'http-auth' )
 		);
 
 		$settings = sprintf(
-			// translators: %s replace with the `Settings` page link.
-			__( '<a href="%s" title="Settings">Settings</a>', 'http-auth' ),
-			'admin.php?page=http-auth-settings'
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=http-auth-settings' ) ),
+			esc_html__( 'Settings', 'http-auth' )
 		);
 
 		array_unshift( $links, $settings );
