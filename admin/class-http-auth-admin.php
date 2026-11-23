@@ -104,17 +104,31 @@ class HTTP_Auth_Admin {
 	}
 
 	/**
+	 * Get the URL of a plugin stylesheet, unminified when SCRIPT_DEBUG is on.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $name Stylesheet name without extension.
+	 *
+	 * @return string
+	 */
+	private function get_style_url( $name ) {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.css' : '.min.css';
+
+		return plugins_url( '/assets/css/' . $name . $suffix, HTTP_AUTH_FILE );
+	}
+
+	/**
 	 * Add about page style.
 	 *
 	 * @access public
 	 * @since  1.0.0
 	 */
 	public function add_about_style() {
-		$filename = 'about-plugins-' . HTTP_AUTH_VERSION . '.min.css';
-		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
 		wp_enqueue_style(
 			'http-auth-about-style',
-			$css_url . $filename,
+			$this->get_style_url( 'about-plugins' ),
 			array(),
 			HTTP_AUTH_VERSION
 		);
@@ -127,11 +141,9 @@ class HTTP_Auth_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_settings_page_style() {
-		$filename = 'admin-style-' . HTTP_AUTH_VERSION . '.min.css';
-		$css_url  = plugins_url( '/assets/css/', HTTP_AUTH_FILE );
 		wp_enqueue_style(
 			'http-auth-settings-style',
-			$css_url . $filename,
+			$this->get_style_url( 'admin-style' ),
 			array(),
 			HTTP_AUTH_VERSION
 		);
