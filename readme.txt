@@ -54,6 +54,18 @@ This process defines you the steps to follow either you are installing through W
 
 == Frequently Asked Questions ==
 
+= I am locked out. How do I turn it off? =
+
+Add this line to `wp-config.php`, above the "That's all, stop editing!" line:
+
+`define( 'HTTP_AUTH_DISABLE', true );`
+
+HTTP Auth stops asking for credentials until you remove the line. Your settings are kept.
+
+= "Complete Site" is on but some pages open without a prompt. =
+
+A page cache is serving copies saved before HTTP Auth was turned on. Protected pages are no longer cached, so clear your caching plugin and any host or CDN cache once after turning it on.
+
 = What does "Login, Admin Pages and XML-RPC" protect? =
 
 The login page, all admin pages and `xmlrpc.php`. `admin-ajax.php` and valid logout requests are not protected so the frontend keeps working.

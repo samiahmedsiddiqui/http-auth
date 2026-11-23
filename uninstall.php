@@ -16,6 +16,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  * Delete plugin options for the current site.
  */
 function http_auth_delete_options() {
+	delete_option( 'http_auth_config' );
 	delete_option( 'http_auth_settings' );
 	delete_option( 'http_auth_plugin_version' );
 	delete_option( 'http_auth_db_version' );

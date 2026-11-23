@@ -223,7 +223,7 @@ class HTTP_Auth_Settings {
 			'activate' => $activate,
 		);
 
-		update_option( 'http_auth_settings', $settings );
+		HTTP_Auth::save_settings( $settings );
 
 		if ( 'on' === $activate ) {
 			HTTP_Auth_Htaccess::add_rules();
@@ -278,7 +278,19 @@ class HTTP_Auth_Settings {
 			esc_html_e( 'HTTP Auth SETTINGS', 'http-auth' );
 			?>
 			</h1>
-			<?php $this->get_notice_output(); ?>
+			<?php
+			$this->get_notice_output();
+			if ( HTTP_Auth::is_disabled() ) {
+				printf(
+					'<div class="notice notice-warning"><p>%s</p></div>',
+					sprintf(
+						// translators: %s is replaced with the constant name.
+						esc_html__( 'HTTP Auth is turned off by %s in wp-config.php. Remove it to turn protection back on.', 'http-auth' ),
+						'<code>HTTP_AUTH_DISABLE</code>'
+					)
+				);
+			}
+			?>
 			<form method="POST" action="" id="http-auth">
 			<?php
 				wp_nonce_field(
