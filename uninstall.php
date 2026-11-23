@@ -23,6 +23,10 @@ function http_auth_delete_options() {
 }
 
 if ( is_multisite() ) {
+	delete_site_option( 'http_auth_config' );
+	delete_site_option( 'http_auth_settings' );
+	delete_site_option( 'http_auth_db_version' );
+
 	$http_auth_site_ids = get_sites(
 		array(
 			'fields' => 'ids',
