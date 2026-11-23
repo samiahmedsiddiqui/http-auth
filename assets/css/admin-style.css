@@ -155,6 +155,38 @@
 	font-weight: 400;
 }
 
+/* Per-site credentials */
+.http-auth-creds {
+	margin-top: 6px;
+}
+
+.http-auth-creds summary {
+	color: #2271b1;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.http-auth-creds-fields {
+	display: grid;
+	gap: 4px;
+	margin-top: 8px;
+	max-width: 260px;
+}
+
+.http-auth-creds-fields label {
+	font-size: 12px;
+}
+
+.http-auth-creds-fields input[type="text"],
+.http-auth-creds-fields input[type="password"],
+.http-auth-creds-fields textarea {
+	width: 100%;
+}
+
+.http-auth-creds-fields label:first-child {
+	margin-bottom: 4px;
+}
+
 /* Toggle switch */
 .http-auth-toggle {
 	align-items: center;
