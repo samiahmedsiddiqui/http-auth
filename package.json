@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@wordpress/stylelint-config": "27.2.0",
 		"clean-css": "5.3.3",
-		"stylelint": "17.16.0",
-		"stylelint-scss": "7.2.0"
+		"stylelint": "18.0.0",
+		"stylelint-scss": "7.5.0"
 	}
 }
