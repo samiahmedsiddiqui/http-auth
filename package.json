@@ -11,7 +11,7 @@
 	},
 	"author": "Sami Ahmed Siddiqui",
 	"scripts": {
-		"build": "npx gulp build",
+		"build": "node scripts/build-css.js",
 		"version": "node scripts/sync-version.js && npm run build && git add http-auth.php readme.txt assets/css",
 		"format:fix": "npm run format:css:fix",
 		"format:css:fix": "npx stylelint **/*.css --fix",
@@ -20,9 +20,6 @@
 	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "23.6.0",
-		"gulp": "5.0.0",
-		"gulp-clean-css": "4.3.0",
-		"gulp-rename": "2.0.0",
-		"gulp-uglify": "3.0.2"
+		"clean-css": "5.3.3"
 	}
 }
