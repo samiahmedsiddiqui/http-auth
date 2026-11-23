@@ -17,7 +17,7 @@ class HTTP_Auth_Admin {
 	 * Initializes WordPress hooks.
 	 */
 	public function __construct() {
-		if ( HTTP_Auth::is_network_mode() ) {
+		if ( HTTP_Auth_Config::is_network_mode() ) {
 			add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 			add_filter(
 				'network_admin_plugin_action_links_' . HTTP_AUTH_BASENAME,
@@ -41,7 +41,7 @@ class HTTP_Auth_Admin {
 	 * @return string
 	 */
 	public static function get_capability() {
-		return HTTP_Auth::is_network_mode() ? 'manage_network_options' : 'activate_plugins';
+		return HTTP_Auth_Config::is_network_mode() ? 'manage_network_options' : 'activate_plugins';
 	}
 
 	/**
@@ -56,36 +56,35 @@ class HTTP_Auth_Admin {
 	 * @return string
 	 */
 	public static function get_page_url( $page, $args = array() ) {
-		$path = 'admin.php?page=' . $page;
-		$url  = HTTP_Auth::is_network_mode() ? network_admin_url( $path ) : admin_url( $path );
+		$network = HTTP_Auth_Config::is_network_mode();
+		if ( 'http-auth-settings' === $page ) {
+			$path = ( $network ? 'settings.php' : 'options-general.php' ) . '?page=' . $page;
+		} else {
+			$path = 'admin.php?page=' . $page;
+		}
+
+		$url = $network ? network_admin_url( $path ) : admin_url( $path );
 
 		return add_query_arg( $args, $url );
 	}
 
 	/**
-	 * Added Pages in Dashboard Menu for Settings.
+	 * Add the settings page under Settings and a hidden About page.
 	 *
 	 * @access public
 	 * @since  0.1
 	 */
 	public function admin_menu() {
-		add_menu_page(
-			__( 'HTTP Auth', 'http-auth' ),
-			__( 'HTTP Auth', 'http-auth' ),
-			self::get_capability(),
-			'http-auth-settings',
-			array( $this, 'admin_settings_page' )
-		);
 		$settings_page = add_submenu_page(
-			'http-auth-settings',
+			HTTP_Auth_Config::is_network_mode() ? 'settings.php' : 'options-general.php',
 			__( 'HTTP Auth Settings', 'http-auth' ),
-			__( 'Settings', 'http-auth' ),
+			__( 'HTTP Auth', 'http-auth' ),
 			self::get_capability(),
 			'http-auth-settings',
 			array( $this, 'admin_settings_page' )
 		);
 		$about_page    = add_submenu_page(
-			'http-auth-settings',
+			'',
 			__( 'About HTTP Auth', 'http-auth' ),
 			__( 'About', 'http-auth' ),
 			self::get_capability(),

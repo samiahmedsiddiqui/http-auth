@@ -184,7 +184,7 @@ class HTTP_Auth_Frontend {
 	 * @return int
 	 */
 	private function get_attempts( $key ) {
-		if ( HTTP_Auth::is_network_mode() ) {
+		if ( HTTP_Auth_Config::is_network_mode() ) {
 			return (int) get_site_transient( $key );
 		}
 
@@ -202,7 +202,7 @@ class HTTP_Auth_Frontend {
 	 * @param int    $lockout  Lockout duration in seconds.
 	 */
 	private function set_attempts( $key, $attempts, $lockout ) {
-		$network = HTTP_Auth::is_network_mode();
+		$network = HTTP_Auth_Config::is_network_mode();
 
 		if ( 0 === $attempts ) {
 			if ( $network ) {
@@ -290,16 +290,34 @@ class HTTP_Auth_Frontend {
 	}
 
 	/**
+	 * Keep page caches from storing or serving protected pages.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 */
+	private function prevent_caching() {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
+	}
+
+	/**
 	 * Check HTTP Auth activated and then apply HTTP Authentication.
 	 *
 	 * @access public
 	 * @since  0.1
 	 */
 	public function add_restriction() {
-		$config = HTTP_Auth::get_current_config();
+		$config = HTTP_Auth_Config::get_current_config();
 		if ( null === $config || ! $this->is_protected_request( $config ) ) {
 			return;
 		}
+
+		$this->prevent_caching();
 
 		/**
 		 * Filters the failed attempts allowed per IP. 0 disables throttling.

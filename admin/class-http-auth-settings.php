@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Settings page with a tab for admin and a tab for complete site protection.
+ * Settings page with Sites, Admin Site and Complete Site tabs.
  */
 class HTTP_Auth_Settings {
 
@@ -38,6 +38,23 @@ class HTTP_Auth_Settings {
 	 */
 	private function get_tabs() {
 		return array(
+			'sites' => __( 'Sites', 'http-auth' ),
+			'admin' => __( 'Admin Site', 'http-auth' ),
+			'site'  => __( 'Complete Site', 'http-auth' ),
+		);
+	}
+
+	/**
+	 * Get the protection mode labels.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @return array
+	 */
+	private function get_mode_labels() {
+		return array(
+			'none'  => __( 'None', 'http-auth' ),
 			'admin' => __( 'Admin Site', 'http-auth' ),
 			'site'  => __( 'Complete Site', 'http-auth' ),
 		);
@@ -53,7 +70,7 @@ class HTTP_Auth_Settings {
 	 */
 	private function get_current_tab() {
 		// phpcs:disable WordPress.Security.NonceVerification
-		$tab = 'admin';
+		$tab = 'sites';
 		if ( isset( $_POST['http_auth_tab'] ) ) {
 			$tab = sanitize_key( wp_unslash( $_POST['http_auth_tab'] ) );
 		} elseif ( isset( $_GET['tab'] ) ) {
@@ -61,7 +78,7 @@ class HTTP_Auth_Settings {
 		}
 		// phpcs:enable WordPress.Security.NonceVerification
 
-		return in_array( $tab, HTTP_Auth::TABS, true ) ? $tab : 'admin';
+		return array_key_exists( $tab, $this->get_tabs() ) ? $tab : 'sites';
 	}
 
 	/**
@@ -71,7 +88,7 @@ class HTTP_Auth_Settings {
 	 * @since  1.1.0
 	 *
 	 * @param string $current  Current tab.
-	 * @param array  $settings Settings of all tabs.
+	 * @param array  $settings Settings.
 	 */
 	private function get_tabs_output( $current, $settings ) {
 		?>
@@ -79,7 +96,11 @@ class HTTP_Auth_Settings {
 			<?php foreach ( $this->get_tabs() as $tab => $label ) : ?>
 				<a href="<?php echo esc_url( HTTP_Auth_Admin::get_page_url( 'http-auth-settings', array( 'tab' => $tab ) ) ); ?>" class="nav-tab<?php echo $current === $tab ? ' nav-tab-active' : ''; ?>">
 					<?php echo esc_html( $label ); ?>
-					<?php $this->get_badge_output( HTTP_Auth::is_enabled( $settings[ $tab ] ) ); ?>
+					<?php
+					if ( 'sites' !== $tab ) {
+						$this->get_badge_output( HTTP_Auth_Config::is_mode_enabled( $settings['modes'][ $tab ] ) );
+					}
+					?>
 				</a>
 			<?php endforeach; ?>
 		</nav>
@@ -92,7 +113,7 @@ class HTTP_Auth_Settings {
 	 * @access private
 	 * @since  1.1.0
 	 *
-	 * @param bool $active Whether the tab is active.
+	 * @param bool $active Whether the mode is active.
 	 */
 	private function get_badge_output( $active ) {
 		if ( $active ) {
@@ -103,19 +124,184 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Generate the Protection card HTML.
+	 * Generate a protection mode select.
 	 *
 	 * @access private
 	 * @since  1.1.0
 	 *
-	 * @param string $tab      Current tab.
+	 * @param string $name    Field name.
+	 * @param string $current Selected mode.
+	 * @param array  $modes   Allowed modes.
+	 * @param string $label   Accessible label.
+	 */
+	private function get_mode_select( $name, $current, $modes, $label ) {
+		$labels = $this->get_mode_labels();
+		?>
+		<select name="<?php echo esc_attr( $name ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
+			<?php foreach ( $modes as $mode ) : ?>
+				<option value="<?php echo esc_attr( $mode ); ?>" <?php selected( $mode, $current ); ?>><?php echo esc_html( $labels[ $mode ] ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Generate the Sites tab HTML.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param array $settings Settings.
+	 */
+	private function get_sites_output( $settings ) {
+		$rows    = HTTP_Auth_Config::get_sites( $settings );
+		$matched = HTTP_Auth_Config::match_site( $rows );
+		$labels  = $this->get_mode_labels();
+		$index   = 0;
+		?>
+		<div class="http-auth-card">
+			<div class="http-auth-card-header">
+				<h2><?php esc_html_e( 'Sites', 'http-auth' ); ?></h2>
+				<p><?php esc_html_e( 'Choose how each site is protected. A site matches its exact URL first, then the most specific wildcard.', 'http-auth' ); ?></p>
+			</div>
+			<table class="widefat striped http-auth-sites-table">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Site URL', 'http-auth' ); ?></th>
+						<th scope="col" class="http-auth-col-source"><?php esc_html_e( 'Source', 'http-auth' ); ?></th>
+						<th scope="col" class="http-auth-col-mode"><?php esc_html_e( 'Protection', 'http-auth' ); ?></th>
+						<th scope="col" class="http-auth-col-remove"><?php esc_html_e( 'Remove', 'http-auth' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php if ( empty( $rows ) ) : ?>
+						<tr>
+							<td colspan="4"><?php esc_html_e( 'No sites yet. Add them below or in code.', 'http-auth' ); ?></td>
+						</tr>
+					<?php endif; ?>
+					<?php foreach ( $rows as $row ) : ?>
+						<?php
+						$name       = 'http_auth_rows[' . $index . ']';
+						$is_current = null !== $matched && $matched['url'] === $row['url'];
+						?>
+						<tr<?php echo $is_current ? ' class="is-current"' : ''; ?>>
+							<td>
+								<input type="hidden" name="<?php echo esc_attr( $name . '[url]' ); ?>" value="<?php echo esc_attr( $row['url'] ); ?>" />
+								<code><?php echo esc_html( $row['url'] ); ?></code>
+								<?php if ( $is_current ) : ?>
+									<span class="http-auth-badge is-current"><?php esc_html_e( 'This site', 'http-auth' ); ?></span>
+								<?php endif; ?>
+							</td>
+							<td>
+								<span class="http-auth-source"><?php echo 'code' === $row['source'] ? esc_html__( 'Code', 'http-auth' ) : esc_html__( 'Settings', 'http-auth' ); ?></span>
+							</td>
+							<td>
+								<?php
+								$this->get_mode_select(
+									$name . '[mode]',
+									$row['mode'],
+									array( 'none', 'admin', 'site' ),
+									// translators: %s is replaced with the site URL.
+									sprintf( __( 'Protection for %s', 'http-auth' ), $row['url'] )
+								);
+								if ( 'none' !== $row['mode'] && ! HTTP_Auth_Config::is_mode_enabled( $settings['modes'][ $row['mode'] ] ) ) {
+									// translators: %s is replaced with the mode name.
+									echo '<p class="http-auth-warning">' . esc_html( sprintf( __( '%s is not active.', 'http-auth' ), $labels[ $row['mode'] ] ) ) . '</p>';
+								}
+								?>
+							</td>
+							<td class="http-auth-col-remove">
+								<?php if ( 'settings' === $row['source'] ) : ?>
+									<?php
+									// translators: %s is replaced with the site URL.
+									$remove_label = sprintf( __( 'Remove %s', 'http-auth' ), $row['url'] );
+									?>
+									<input type="checkbox" name="<?php echo esc_attr( $name . '[remove]' ); ?>" value="1" aria-label="<?php echo esc_attr( $remove_label ); ?>" />
+								<?php endif; ?>
+							</td>
+						</tr>
+						<?php ++$index; ?>
+					<?php endforeach; ?>
+					<tr class="http-auth-default-row<?php echo null === $matched ? ' is-current' : ''; ?>">
+						<td>
+							<strong><?php esc_html_e( 'Any other site', 'http-auth' ); ?></strong>
+							<?php if ( null === $matched ) : ?>
+								<span class="http-auth-badge is-current"><?php esc_html_e( 'This site', 'http-auth' ); ?></span>
+							<?php endif; ?>
+						</td>
+						<td><span class="http-auth-source"><?php esc_html_e( 'Default', 'http-auth' ); ?></span></td>
+						<td>
+							<?php $this->get_mode_select( 'http_auth_default', $settings['default'], array( 'none', 'admin' ), __( 'Protection for any other site', 'http-auth' ) ); ?>
+						</td>
+						<td class="http-auth-col-remove"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="http-auth-card">
+			<div class="http-auth-card-header">
+				<h2><?php esc_html_e( 'Add sites', 'http-auth' ); ?></h2>
+				<p><?php esc_html_e( 'Stored so environment pushes on hosts like WP Engine, Kinsta and Pantheon can not rewrite them.', 'http-auth' ); ?></p>
+			</div>
+			<table class="form-table" role="presentation">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="http-auth-new-urls"><?php esc_html_e( 'Site URLs', 'http-auth' ); ?></label>
+						</th>
+						<td>
+							<textarea id="http-auth-new-urls" name="http_auth_new_urls" rows="3" class="large-text code" placeholder="staging.example.com" aria-describedby="http-auth-new-urls-help"></textarea>
+							<p class="description" id="http-auth-new-urls-help">
+								<?php esc_html_e( 'One URL per line, without http(s)://. Use * as a wildcard, e.g. *.example.com', 'http-auth' ); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Protection', 'http-auth' ); ?></th>
+						<td>
+							<?php $this->get_mode_select( 'http_auth_new_mode', 'site', array( 'none', 'admin', 'site' ), __( 'Protection for the new sites', 'http-auth' ) ); ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="http-auth-card">
+			<div class="http-auth-card-header">
+				<h2><?php esc_html_e( 'Define sites in code', 'http-auth' ); ?></h2>
+				<p><?php esc_html_e( 'List every environment in wp-config.php, a plugin or functions.php. Code is never rewritten by a push.', 'http-auth' ); ?></p>
+			</div>
+			<div class="http-auth-card-body">
+				<pre class="http-auth-code">define( '<?php echo esc_html( HTTP_Auth_Config::URLS_CONSTANT ); ?>', array( 'example.com', 'staging.example.com' ) );</pre>
+				<p class="description">
+					<?php
+					printf(
+						// translators: %s is replaced with the filter name.
+						esc_html__( 'Or use the %s filter. Choose the protection for each URL above.', 'http-auth' ),
+						'<code>http_auth_site_urls</code>'
+					);
+					?>
+				</p>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Generate the Protection card HTML of a mode.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $mode     Mode.
 	 * @param string $activate Activation value (`on` or `off`).
 	 */
-	private function get_protection_output( $tab, $activate ) {
-		if ( 'admin' === $tab ) {
-			$description = __( 'Protect the login page, admin pages and XML-RPC of the listed sites. Recommended for production and multisite.', 'http-auth' );
+	private function get_protection_output( $mode, $activate ) {
+		if ( 'admin' === $mode ) {
+			$description = __( 'Protects the login page, admin pages and XML-RPC of the sites set to Admin Site. Recommended for production and multisite.', 'http-auth' );
 		} else {
-			$description = __( 'Protect every page of the listed sites. Recommended for development, staging and other environments.', 'http-auth' );
+			$description = __( 'Protects every page of the sites set to Complete Site. Recommended for development, staging and other environments.', 'http-auth' );
 		}
 		?>
 		<div class="http-auth-card">
@@ -127,43 +313,9 @@ class HTTP_Auth_Settings {
 				<label class="http-auth-toggle" for="http-auth-activate">
 					<input type="checkbox" id="http-auth-activate" name="http_auth_activate" value="on" <?php checked( 'on', $activate ); ?> />
 					<span class="http-auth-toggle-track" aria-hidden="true"></span>
-					<span class="http-auth-toggle-label"><?php esc_html_e( 'Enable protection on the listed sites', 'http-auth' ); ?></span>
+					<span class="http-auth-toggle-label"><?php esc_html_e( 'Enable protection', 'http-auth' ); ?></span>
 				</label>
 			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Generate the Site URLs card HTML.
-	 *
-	 * @access private
-	 * @since  1.1.0
-	 *
-	 * @param array $urls Site URLs.
-	 */
-	private function get_urls_output( $urls ) {
-		?>
-		<div class="http-auth-card">
-			<div class="http-auth-card-header">
-				<h2><?php esc_html_e( 'Site URLs', 'http-auth' ); ?></h2>
-				<p><?php esc_html_e( 'The sites this tab applies to.', 'http-auth' ); ?></p>
-			</div>
-			<table class="form-table" role="presentation">
-				<tbody>
-					<tr>
-						<th scope="row">
-							<label for="http-auth-urls"><?php esc_html_e( 'Apply on', 'http-auth' ); ?></label>
-						</th>
-						<td>
-							<textarea id="http-auth-urls" name="http_auth_urls" rows="5" class="large-text code" placeholder="<?php echo esc_attr( HTTP_Auth::normalize_url( home_url() ) ); ?>" aria-describedby="http-auth-urls-help"><?php echo esc_textarea( implode( "\n", $urls ) ); ?></textarea>
-							<p class="description" id="http-auth-urls-help">
-								<?php esc_html_e( 'One URL per line, without http(s)://. Use * as a wildcard, e.g. *.example.com', 'http-auth' ); ?>
-							</p>
-						</td>
-					</tr>
-				</tbody>
-			</table>
 		</div>
 		<?php
 	}
@@ -251,31 +403,38 @@ class HTTP_Auth_Settings {
 	 *
 	 * @access private
 	 * @since  1.1.0
+	 *
+	 * @param string $tab      Current tab.
+	 * @param array  $settings Settings.
 	 */
-	private function get_sidebar_output() {
-		if ( HTTP_Auth::is_network_mode() ) {
-			$sites_title = __( 'Network sites', 'http-auth' );
-			$sites       = array();
-			foreach ( get_sites( array( 'number' => 50 ) ) as $site ) {
-				$sites[] = HTTP_Auth::normalize_url( $site->domain . $site->path );
-			}
-		} else {
-			$sites_title = __( 'This site', 'http-auth' );
-			$sites       = array( HTTP_Auth::normalize_url( home_url() ) );
+	private function get_sidebar_output( $tab, $settings ) {
+		$labels = $this->get_mode_labels();
+		$mode   = HTTP_Auth_Config::get_current_mode( $settings );
+		$status = $labels[ $mode ];
+		if ( 'none' !== $mode && ! HTTP_Auth_Config::is_mode_enabled( $settings['modes'][ $mode ] ) ) {
+			// translators: %s is replaced with the mode name.
+			$status = sprintf( __( '%s (not active)', 'http-auth' ), $labels[ $mode ] );
 		}
 		?>
 		<div class="http-auth-card">
 			<div class="http-auth-card-header">
-				<h2><?php echo esc_html( $sites_title ); ?></h2>
+				<h2><?php esc_html_e( 'This site', 'http-auth' ); ?></h2>
 			</div>
 			<div class="http-auth-card-body">
-				<ul class="http-auth-sites">
-					<?php foreach ( $sites as $site_url ) : ?>
-						<li><code><?php echo esc_html( $site_url ); ?></code></li>
-					<?php endforeach; ?>
-				</ul>
+				<p><code><?php echo esc_html( HTTP_Auth_Config::normalize_url( home_url() ) ); ?></code></p>
+				<p>
+					<?php
+					// translators: %s is replaced with the protection mode.
+					echo esc_html( sprintf( __( 'Protection: %s', 'http-auth' ), $status ) );
+					?>
+				</p>
 			</div>
 		</div>
+		<?php
+		if ( 'sites' !== $tab ) {
+			$this->get_mode_sites_output( $tab, $settings );
+		}
+		?>
 		<div class="http-auth-card">
 			<div class="http-auth-card-header">
 				<h2><?php esc_html_e( 'How it works', 'http-auth' ); ?></h2>
@@ -290,9 +449,56 @@ class HTTP_Auth_Settings {
 						<strong><?php esc_html_e( 'Complete Site', 'http-auth' ); ?></strong>
 						<?php esc_html_e( 'protects every page.', 'http-auth' ); ?>
 					</li>
-					<li><?php esc_html_e( 'If a site is listed in both tabs, Complete Site is applied.', 'http-auth' ); ?></li>
-					<li><?php esc_html_e( 'Each tab has its own credentials.', 'http-auth' ); ?></li>
+					<li><?php esc_html_e( 'Each mode has its own credentials.', 'http-auth' ); ?></li>
+					<li><?php esc_html_e( 'Sites not listed use the default: None or Admin Site.', 'http-auth' ); ?></li>
 				</ul>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Generate the list of sites using a mode.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $mode     Mode.
+	 * @param array  $settings Settings.
+	 */
+	private function get_mode_sites_output( $mode, $settings ) {
+		$labels = $this->get_mode_labels();
+		$using  = array();
+		foreach ( HTTP_Auth_Config::get_sites( $settings ) as $row ) {
+			if ( $mode === $row['mode'] ) {
+				$using[] = $row['url'];
+			}
+		}
+
+		$uses_default = 'admin' === $mode && 'admin' === $settings['default'];
+		?>
+		<div class="http-auth-card">
+			<div class="http-auth-card-header">
+				<h2>
+					<?php
+					// translators: %s is replaced with the mode name.
+					echo esc_html( sprintf( __( 'Sites using %s', 'http-auth' ), $labels[ $mode ] ) );
+					?>
+				</h2>
+			</div>
+			<div class="http-auth-card-body">
+				<?php if ( empty( $using ) && ! $uses_default ) : ?>
+					<p><?php esc_html_e( 'None yet. Assign sites in the Sites tab.', 'http-auth' ); ?></p>
+				<?php else : ?>
+					<ul class="http-auth-sites">
+						<?php foreach ( $using as $url ) : ?>
+							<li><code><?php echo esc_html( $url ); ?></code></li>
+						<?php endforeach; ?>
+						<?php if ( $uses_default ) : ?>
+							<li><?php esc_html_e( 'Any other site', 'http-auth' ); ?></li>
+						<?php endif; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php
@@ -321,7 +527,7 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Parse the Site URLs textarea.
+	 * Parse a textarea of URLs.
 	 *
 	 * @access private
 	 * @since  1.1.0
@@ -333,12 +539,12 @@ class HTTP_Auth_Settings {
 	private function parse_urls( $value ) {
 		$urls = array();
 		foreach ( preg_split( '/\R/', $value ) as $line ) {
-			$url = HTTP_Auth::normalize_url( $line );
+			$url = HTTP_Auth_Config::normalize_url( $line );
 			if ( '' === $url ) {
 				continue;
 			}
 
-			if ( ! preg_match( '#^[a-z0-9*][a-z0-9*.-]*(:\d+)?(/[a-z0-9*._~%/-]*)?$#', $url ) ) {
+			if ( ! HTTP_Auth_Config::is_valid_url( $url ) ) {
 				return false;
 			}
 
@@ -349,7 +555,7 @@ class HTTP_Auth_Settings {
 	}
 
 	/**
-	 * Save the settings of the submitted tab.
+	 * Save the submitted tab.
 	 *
 	 * @access public
 	 * @since  1.0.0
@@ -368,13 +574,111 @@ class HTTP_Auth_Settings {
 			wp_die( esc_html__( 'Sorry, you are not allowed to manage these settings.', 'http-auth' ) );
 		}
 
-		$tab      = $this->get_current_tab();
-		$settings = HTTP_Auth::get_settings();
-		$current  = $settings[ $tab ];
+		$tab = $this->get_current_tab();
+		if ( 'sites' === $tab ) {
+			$this->save_sites();
+		} else {
+			$this->save_mode( $tab );
+		}
+	}
+
+	/**
+	 * Save the Sites tab.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 */
+	private function save_sites() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified in maybe_save().
+		$settings  = HTTP_Auth_Config::get_settings();
+		$code_urls = HTTP_Auth_Config::get_code_urls();
+		$modes     = array( 'none', 'admin', 'site' );
+		$rows      = array();
+
+		$posted = array();
+		if ( isset( $_POST['http_auth_rows'] ) && is_array( $_POST['http_auth_rows'] ) ) {
+			$posted = map_deep( wp_unslash( $_POST['http_auth_rows'] ), 'sanitize_text_field' );
+		}
+
+		foreach ( $posted as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['url'] ) ) {
+				continue;
+			}
+
+			$url     = HTTP_Auth_Config::normalize_url( $item['url'] );
+			$is_code = in_array( $url, $code_urls, true );
+			if ( ! HTTP_Auth_Config::is_valid_url( $url ) || isset( $rows[ $url ] )
+				|| ( ! $is_code && ! empty( $item['remove'] ) )
+			) {
+				continue;
+			}
+
+			$rows[ $url ] = array(
+				'url'    => $url,
+				'mode'   => isset( $item['mode'] ) && in_array( $item['mode'], $modes, true ) ? $item['mode'] : 'none',
+				'source' => $is_code ? 'code' : 'settings',
+			);
+		}
+
+		$new_urls = '';
+		if ( isset( $_POST['http_auth_new_urls'] ) ) {
+			$new_urls = sanitize_textarea_field( wp_unslash( $_POST['http_auth_new_urls'] ) );
+		}
+
+		$new_urls = $this->parse_urls( $new_urls );
+		if ( false === $new_urls ) {
+			$this->redirect( 'sites', 'invalid-urls' );
+		}
+
+		$new_mode = 'none';
+		if ( isset( $_POST['http_auth_new_mode'] ) ) {
+			$posted_mode = sanitize_key( wp_unslash( $_POST['http_auth_new_mode'] ) );
+			if ( in_array( $posted_mode, $modes, true ) ) {
+				$new_mode = $posted_mode;
+			}
+		}
+
+		foreach ( $new_urls as $url ) {
+			if ( ! isset( $rows[ $url ] ) ) {
+				$rows[ $url ] = array(
+					'url'    => $url,
+					'mode'   => $new_mode,
+					'source' => in_array( $url, $code_urls, true ) ? 'code' : 'settings',
+				);
+			}
+		}
+
+		// Keep data of other features stored on a row.
+		foreach ( $rows as $url => $row ) {
+			if ( isset( $settings['sites'][ $url ]['credentials'] ) ) {
+				$rows[ $url ]['credentials'] = $settings['sites'][ $url ]['credentials'];
+			}
+		}
+
+		$settings['sites']   = $rows;
+		$settings['default'] = isset( $_POST['http_auth_default'] ) && 'admin' === $_POST['http_auth_default'] ? 'admin' : 'none';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		HTTP_Auth_Config::save_settings( $settings );
+
+		$this->redirect( 'sites', 'saved' );
+	}
+
+	/**
+	 * Save the credentials, message and activation of a mode.
+	 *
+	 * @access private
+	 * @since  1.1.0
+	 *
+	 * @param string $mode Mode.
+	 */
+	private function save_mode( $mode ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified in maybe_save().
+		$settings = HTTP_Auth_Config::get_settings();
+		$current  = $settings['modes'][ $mode ];
 		$username = '';
 		$password = '';
 		$message  = '';
-		$urls     = '';
 
 		// Credentials are stored as typed, the password gets hashed.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -391,57 +695,55 @@ class HTTP_Auth_Settings {
 			$message = sanitize_textarea_field( wp_unslash( $_POST['http_auth_message'] ) );
 		}
 
-		if ( isset( $_POST['http_auth_urls'] ) ) {
-			$urls = sanitize_textarea_field( wp_unslash( $_POST['http_auth_urls'] ) );
-		}
-
 		$activate = 'off';
 		if ( isset( $_POST['http_auth_activate'] ) && 'on' === $_POST['http_auth_activate'] ) {
 			$activate = 'on';
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( '' === $username || ( '' === $password && '' === $current['password'] ) ) {
-			$this->redirect( $tab, 'missing-credentials' );
+			$this->redirect( $mode, 'missing-credentials' );
 		}
 
 		// Basic auth sends `username:password` so the username can't have a colon.
 		if ( false !== strpos( $username, ':' ) ) {
-			$this->redirect( $tab, 'invalid-username' );
+			$this->redirect( $mode, 'invalid-username' );
 		}
 
-		$urls = $this->parse_urls( $urls );
-		if ( false === $urls ) {
-			$this->redirect( $tab, 'invalid-urls' );
-		}
-
-		if ( 'on' === $activate && empty( $urls ) ) {
-			$this->redirect( $tab, 'missing-urls' );
-		}
-
-		$settings[ $tab ] = array(
+		$settings['modes'][ $mode ] = array(
 			'activate' => $activate,
-			'urls'     => $urls,
 			'username' => $username,
 			'password' => '' === $password ? $current['password'] : wp_hash_password( $password ),
 			'message'  => $message,
 		);
 
-		HTTP_Auth::update_storage_option( 'http_auth_settings', $settings );
+		HTTP_Auth_Config::save_settings( $settings );
 
 		if ( 'on' === $activate ) {
 			HTTP_Auth_Htaccess::add_rules();
 		}
 
-		$this->redirect( $tab, 'saved' );
+		$this->redirect( $mode, 'saved' );
 	}
 
 	/**
-	 * Show the notice for the last save, if any.
+	 * Show the notices for the page.
 	 *
 	 * @access private
 	 * @since  1.1.0
 	 */
 	private function get_notice_output() {
+		if ( HTTP_Auth_Config::is_disabled() ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				sprintf(
+					// translators: %s is replaced with the constant name.
+					esc_html__( 'HTTP Auth is turned off by %s in wp-config.php. Remove it to turn protection back on.', 'http-auth' ),
+					'<code>HTTP_AUTH_DISABLE</code>'
+				)
+			);
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET['http-auth-status'] ) ) {
 			return;
@@ -452,7 +754,6 @@ class HTTP_Auth_Settings {
 			'missing-credentials' => array( 'error', __( 'Username and password are required.', 'http-auth' ) ),
 			'invalid-username'    => array( 'error', __( 'Username can not contain a colon (:).', 'http-auth' ) ),
 			'invalid-urls'        => array( 'error', __( 'One or more site URLs are invalid.', 'http-auth' ) ),
-			'missing-urls'        => array( 'error', __( 'Add at least one site URL to activate.', 'http-auth' ) ),
 		);
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -475,10 +776,9 @@ class HTTP_Auth_Settings {
 	 * @since  0.1
 	 */
 	public function render() {
-		$settings     = HTTP_Auth::get_settings();
-		$tab          = $this->get_current_tab();
-		$tab_settings = $settings[ $tab ];
-		$tabs         = $this->get_tabs();
+		$settings = HTTP_Auth_Config::get_settings();
+		$tab      = $this->get_current_tab();
+		$tabs     = $this->get_tabs();
 		?>
 		<div class="wrap http-auth-settings">
 			<h1><?php esc_html_e( 'HTTP Auth', 'http-auth' ); ?></h1>
@@ -497,20 +797,24 @@ class HTTP_Auth_Settings {
 					?>
 					<input type="hidden" name="http_auth_tab" value="<?php echo esc_attr( $tab ); ?>" />
 					<?php
-					$this->get_protection_output( $tab, $tab_settings['activate'] );
-					$this->get_urls_output( $tab_settings['urls'] );
-					$this->get_credentials_output(
-						$tab_settings['username'],
-						'' !== $tab_settings['password']
-					);
-					$this->get_message_output( $tab_settings['message'] );
+					if ( 'sites' === $tab ) {
+						$this->get_sites_output( $settings );
+					} else {
+						$mode_settings = $settings['modes'][ $tab ];
+						$this->get_protection_output( $tab, $mode_settings['activate'] );
+						$this->get_credentials_output(
+							$mode_settings['username'],
+							'' !== $mode_settings['password']
+						);
+						$this->get_message_output( $mode_settings['message'] );
+					}
 					?>
 					<p class="submit">
 						<?php
 						submit_button(
 							sprintf(
 								// translators: %s is replaced with the tab name.
-								__( 'Save %s Settings', 'http-auth' ),
+								__( 'Save %s', 'http-auth' ),
 								$tabs[ $tab ]
 							),
 							'primary large',
@@ -521,7 +825,7 @@ class HTTP_Auth_Settings {
 					</p>
 				</form>
 				<aside class="http-auth-sidebar">
-					<?php $this->get_sidebar_output(); ?>
+					<?php $this->get_sidebar_output( $tab, $settings ); ?>
 				</aside>
 			</div>
 		</div>

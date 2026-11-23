@@ -69,6 +69,73 @@
 	padding: 16px 20px;
 }
 
+/* Sites table */
+.http-auth-sites-table {
+	border: 0;
+	border-radius: 0 0 4px 4px;
+	box-shadow: none;
+}
+
+.http-auth-sites-table th,
+.http-auth-sites-table td {
+	padding: 10px 20px;
+	vertical-align: middle;
+}
+
+.http-auth-sites-table code {
+	overflow-wrap: anywhere;
+}
+
+.http-auth-sites-table select {
+	min-width: 150px;
+}
+
+.http-auth-sites-table .http-auth-default-row > td {
+	border-top: 1px solid #f0f0f1;
+}
+
+.http-auth-sites-table .is-current > td {
+	background: #f0f6fc;
+}
+
+.http-auth-sites-table .http-auth-col-remove {
+	text-align: center;
+	width: 70px;
+}
+
+.http-auth-sites-table .http-auth-col-source {
+	width: 90px;
+}
+
+.http-auth-sites-table .http-auth-col-mode {
+	width: 190px;
+}
+
+.http-auth-badge.is-current {
+	background: #f0f6fc;
+	color: #2271b1;
+	margin-left: 6px;
+}
+
+.http-auth-source {
+	color: #646970;
+}
+
+.http-auth-warning {
+	color: #996800;
+	margin: 4px 0 0;
+}
+
+.http-auth-code {
+	background: #f6f7f7;
+	border: 1px solid #f0f0f1;
+	border-radius: 4px;
+	margin: 0 0 10px;
+	overflow-x: auto;
+	padding: 10px 12px;
+	white-space: pre;
+}
+
 .http-auth-card .form-table {
 	margin: 0;
 }
@@ -185,7 +252,7 @@
 	padding-top: 0;
 }
 
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 1200px) {
 
 	.http-auth-layout {
 		flex-direction: column;
@@ -198,6 +265,16 @@
 }
 
 @media screen and (max-width: 782px) {
+
+	.http-auth-sites-table th,
+	.http-auth-sites-table td {
+		padding: 10px 12px;
+	}
+
+	.http-auth-sites-table select {
+		max-width: 100%;
+		min-width: 0;
+	}
 
 	.http-auth-card .form-table th,
 	.http-auth-card .form-table td {

@@ -56,22 +56,50 @@ This process defines you the steps to follow either you are installing through W
 
 == Frequently Asked Questions ==
 
-= What is the difference between the Admin Site and Complete Site tabs? =
+= Where are the settings? =
 
-Each tab has its own site URLs, credentials, message and activation.
+Settings > HTTP Auth. When network activated on multisite, Network Admin > Settings > HTTP Auth.
+
+= I am locked out. How do I turn it off? =
+
+Add this line to `wp-config.php`, above the "That's all, stop editing!" line:
+
+`define( 'HTTP_AUTH_DISABLE', true );`
+
+HTTP Auth stops asking for credentials until you remove the line. Your settings are kept.
+
+= What is the difference between Admin Site and Complete Site? =
+
+Each has its own credentials, message and activation.
 
 * **Admin Site** protects the login page, all admin pages and `xmlrpc.php`. `admin-ajax.php` and valid logout requests are not protected so the frontend keeps working. Use it for production and multisite.
 * **Complete Site** protects every page. Use it for development, staging and other environments.
 
-If a site is listed in both tabs, Complete Site is applied.
+In the **Sites** tab, choose None, Admin Site or Complete Site for each site URL. Sites not listed use the default, which can be None or Admin Site.
 
-= How are the site URLs matched? =
+= How are site URLs matched? =
 
-Enter one URL per line without `http(s)://`, e.g. `example.com` or `example.com/blog` for a subdirectory site. Use `*` as a wildcard, e.g. `*.example.com`. URLs are matched against the site URL configured in WordPress, so the same database can be copied between production and staging and each environment gets its own protection.
+URLs are written without `http(s)://`, e.g. `example.com` or `example.com/blog` for a subdirectory site. Use `*` as a wildcard, e.g. `*.example.com`. An exact URL wins over a wildcard, and a more specific wildcard wins over a broader one.
+
+URLs are matched against the site URL configured in WordPress, never the address sent by the visitor.
+
+= My host copies the site between production and staging. =
+
+Hosts like WP Engine, Kinsta and Pantheon search-replace the site URL in the database when copying between environments. HTTP Auth stores its site list encoded so it is not rewritten, and each environment keeps its own protection.
+
+You can also list every environment in `wp-config.php`, a plugin or your theme's `functions.php`, which is never rewritten:
+
+`define( 'HTTP_AUTH_SITE_URLS', array( 'example.com', 'staging.example.com' ) );`
+
+On PHP 5.6 use a comma separated string instead of an array. The `http_auth_site_urls` filter works too. Then choose the protection for each URL in the Sites tab.
 
 = How does it work on multisite? =
 
-When network activated, the settings page is available in the Network Admin and the URL lists cover every site in the network.
+When network activated, the settings are in Network Admin and the Sites tab covers every site in the network. Settings from each site of older versions are imported on upgrade.
+
+= "Complete Site" is on but some pages open without a prompt. =
+
+A page cache is serving copies saved before HTTP Auth was turned on. Protected pages are no longer cached, so clear your caching plugin and any host or CDN cache once after turning it on.
 
 = I got locked out after too many failed attempts. =
 
